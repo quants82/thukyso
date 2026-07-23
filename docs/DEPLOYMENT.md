@@ -33,3 +33,5 @@ pnpm prisma:generate
 pnpm prisma:deploy
 pnpm check
 ```
+
+Hai service production dùng template versioned tại `infrastructure/systemd`. Cả hai chạy bằng user `thukyso`, đọc `.env` quyền `600`, khởi động qua Node trong NVM riêng và không dùng Node hệ thống.

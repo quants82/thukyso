@@ -12,6 +12,7 @@
 - Thêm kiểm tra health thật cho PostgreSQL và Redis.
 - Thêm validation cấu hình, request ID, JSON logging và global error handler.
 - Thêm BullMQ system queue với Redis database/prefix cô lập.
+- Thêm systemd unit và startup script cô lập cho API/worker trên Linux.
 
 ### Changed
 

@@ -1,0 +1,23 @@
+[Unit]
+Description=Thu Ky So BullMQ Worker
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=thukyso
+Group=thukyso
+WorkingDirectory=/var/www/thukyso.vatli365.vn/app
+EnvironmentFile=/var/www/thukyso.vatli365.vn/app/.env
+ExecStart=/bin/bash /var/www/thukyso.vatli365.vn/app/infrastructure/scripts/run-service.sh worker
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/thukyso.vatli365.vn
+
+[Install]
+WantedBy=multi-user.target
