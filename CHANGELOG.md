@@ -18,6 +18,7 @@
 - Thêm session cookie HttpOnly, rotation/revoke và audit log.
 - Thêm mã hóa AES-256-GCM cho Google refresh token.
 - Thêm migration `UserSession` và API `/auth/google`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
+- Thêm tài liệu trạng thái dự án, runbook vận hành và danh sách lưu ý quan trọng.
 
 ### Changed
 

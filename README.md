@@ -2,6 +2,17 @@
 
 Trợ lý xử lý văn bản và điều hành AI. Sản phẩm không phải dịch vụ chữ ký điện tử.
 
+## Tài liệu dự án
+
+- [Trạng thái hiện tại](docs/PROJECT_STATUS.md)
+- [Kiến trúc](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Hướng dẫn vận hành](docs/OPERATIONS.md)
+- [Lưu ý quan trọng](docs/IMPORTANT_NOTES.md)
+- [Google OAuth](docs/GOOGLE_OAUTH.md)
+- [Bảo mật](docs/SECURITY.md)
+- [Triển khai](docs/DEPLOYMENT.md)
+
 ## Yêu cầu
 
 - Node.js 22+
