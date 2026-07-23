@@ -23,4 +23,19 @@ pnpm dev
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 
-Phase 0 dùng health check độc lập với PostgreSQL/Redis. Kiểm tra kết nối thật được triển khai ở Phase 1.
+Health check Phase 1 trả:
+
+```json
+{
+  "status": "ok",
+  "database": "up",
+  "redis": "up"
+}
+```
+
+Khởi tạo database:
+
+```bash
+pnpm prisma:generate
+pnpm prisma:migrate
+```

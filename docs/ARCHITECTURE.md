@@ -42,6 +42,21 @@ PostgreSQL      Redis/BullMQ
 - Worker phải idempotent dựa trên Drive file ID, checksum và khóa job.
 - Không cache toàn bộ PDF nội bộ trên điện thoại.
 
-## Quyết định Phase 0
+## Cô lập với hệ thống vatli365.vn hiện hữu
 
-Các ứng dụng là placeholder có thể lint, typecheck, test, build và chạy độc lập. PostgreSQL/Redis được cung cấp qua Compose nhưng chưa được API sử dụng; kết nối thật thuộc Phase 1.
+- Máy chủ Linux đang có backend dùng chung tại `/var/www/backend` cho các subdomain như ebook, eng và các dịch vụ liên quan.
+- `ominilab.vatli365.vn` đã có frontend và backend độc lập.
+- Thư Ký Số phải được triển khai thành stack độc lập, không đặt mã nguồn vào các thư mục ứng dụng hiện hữu và không dùng chung tiến trình.
+- Không sửa, khởi động lại hoặc thay thế cấu hình của backend dùng chung hay `ominilab.vatli365.vn`.
+- Cổng host của Thư Ký Số chỉ được chốt sau khi kiểm kê cổng đang lắng nghe trên server.
+- PostgreSQL và Redis của Thư Ký Số dùng network nội bộ riêng, không công khai cổng ra Internet trong production.
+- Reverse proxy chỉ thêm virtual host mới cho `thukyso.vatli365.vn` và API tương ứng; phải kiểm tra cấu hình trước khi reload.
+
+## Nền tảng backend Phase 1
+
+- NestJS API kiểm tra cấu hình bắt buộc ngay khi khởi động.
+- Prisma quản lý schema PostgreSQL và migration; schema nghiệp vụ nền tảng dùng UUID và quan hệ theo organization.
+- API health kiểm tra kết nối PostgreSQL và Redis thật, trả HTTP 503 khi một dependency ngừng hoạt động.
+- Mọi response có header `x-request-id`; access log và lỗi máy chủ dùng JSON một dòng để có thể đưa vào hệ thống log tập trung.
+- BullMQ dùng `REDIS_PREFIX` và Redis database riêng theo `REDIS_URL`; job nghiệp vụ được bổ sung từ Phase 4.
+- API và worker đóng kết nối sạch khi nhận SIGINT/SIGTERM.

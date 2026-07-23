@@ -12,13 +12,21 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@prisma/client": "^6.13.0",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
+    "@thukyso/config": "workspace:*",
+    "express": "^5.1.0",
+    "ioredis": "^5.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/testing": "^11.1.6",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3",
+    "@types/express": "^5.0.3",
     "tsx": "^4.20.3"
   }
 }

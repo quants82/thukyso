@@ -18,6 +18,8 @@
 - AI không được tự suy diễn hoặc tự điền số liệu còn thiếu.
 - File gốc thuộc Google Drive; file tạm phải được xóa sau khi xử lý.
 - API công khai nằm dưới `/api/v1`.
+- Triển khai production phải cô lập khỏi `/var/www/backend` và stack `ominilab.vatli365.vn`; không chọn cổng trước khi kiểm kê server.
+- Không sửa hoặc restart dịch vụ hiện hữu khi triển khai Thư Ký Số.
 
 ## Chất lượng
 

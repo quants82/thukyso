@@ -8,3 +8,12 @@
 - Thêm các package dùng chung, tài liệu kiến trúc, roadmap và bảo mật.
 - Thêm PostgreSQL và Redis cho môi trường local bằng Docker Compose.
 - Thêm CI cho lint, typecheck, test và build.
+- Thêm Prisma schema và migration nền tảng cho dữ liệu nghiệp vụ.
+- Thêm kiểm tra health thật cho PostgreSQL và Redis.
+- Thêm validation cấu hình, request ID, JSON logging và global error handler.
+- Thêm BullMQ system queue với Redis database/prefix cô lập.
+
+### Changed
+
+- Ràng buộc stack production không được ảnh hưởng backend dùng chung và `ominilab.vatli365.vn`.
+- Chỉ bind PostgreSQL và Redis local qua `127.0.0.1` trong Docker Compose phát triển.

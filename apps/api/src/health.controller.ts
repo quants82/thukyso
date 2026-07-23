@@ -1,15 +1,19 @@
-import { Controller, Get } from "@nestjs/common";
-
-export const phaseZeroHealth = {
-  status: "ok",
-  phase: 0,
-  service: "api"
-} as const;
+import { Controller, Get, Inject, ServiceUnavailableException } from "@nestjs/common";
+import { HealthService } from "./health.service.js";
 
 @Controller("health")
 export class HealthController {
+  constructor(@Inject(HealthService) private readonly healthService: HealthService) {}
+
   @Get()
-  getHealth() {
-    return phaseZeroHealth;
+  async getHealth() {
+    const health = await this.healthService.check();
+    if (health.status !== "ok") {
+      throw new ServiceUnavailableException({
+        ...health,
+        message: "Một hoặc nhiều dịch vụ phụ thuộc không sẵn sàng"
+      });
+    }
+    return health;
   }
 }

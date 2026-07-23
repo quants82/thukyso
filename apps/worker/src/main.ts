@@ -1,13 +1,17 @@
+import { loadEnvironment } from "@thukyso/config";
+import { createSystemQueue } from "./queue.js";
 import { workerStatus } from "./status.js";
 
-console.log("Thư Ký Số worker placeholder", workerStatus());
+const environment = loadEnvironment();
+const queue = createSystemQueue(environment.REDIS_URL, environment.REDIS_PREFIX);
+await queue.waitUntilReady();
 
-const keepAlive = setInterval(() => undefined, 60_000);
+console.log("Thư Ký Số worker", workerStatus(true));
 
-function shutdown() {
-  clearInterval(keepAlive);
-  process.exit(0);
+async function shutdown() {
+  await queue.close();
+  process.exitCode = 0;
 }
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGINT", () => void shutdown());
+process.on("SIGTERM", () => void shutdown());

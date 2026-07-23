@@ -7,4 +7,407 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Domain models and the first migration belong to Phase 1.
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum DriveConnectionStatus {
+  ACTIVE
+  DISCONNECTED
+  REAUTH_REQUIRED
+}
+
+enum DocumentStatus {
+  NEW
+  QUEUED
+  DOWNLOADING
+  EXTRACTING
+  ANALYZING
+  COMPARING
+  REPORT_GENERATING
+  REVIEW_REQUIRED
+  APPROVED
+  ARCHIVED
+  FAILED
+}
+
+enum TaskStatus {
+  ASSIGNED
+  ACKNOWLEDGED
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_REVIEW
+  RETURNED
+  APPROVED
+  COMPLETED
+  OVERDUE
+}
+
+enum TaskAssigneeRole {
+  OWNER
+  CONTRIBUTOR
+  REVIEWER
+  APPROVER
+  WATCHER
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id               String            @id @default(uuid()) @db.Uuid
+  email            String            @unique
+  displayName      String?
+  avatarUrl        String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  memberships      Membership[]
+  oauthAccounts    OauthAccount[]
+  driveConnections DriveConnection[]
+  tasksCreated     Task[]            @relation("TaskCreator")
+  taskAssignments  TaskAssignee[]
+  taskComments     TaskComment[]
+  notifications    Notification[]
+  devices          Device[]
+  auditLogs        AuditLog[]
+}
+
+model Organization {
+  id               String            @id @default(uuid()) @db.Uuid
+  name             String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  memberships      Membership[]
+  driveConnections DriveConnection[]
+  documents        Document[]
+  reportTemplates  ReportTemplate[]
+  generatedReports GeneratedReport[]
+  tasks            Task[]
+  notifications    Notification[]
+  jobs             Job[]
+  auditLogs        AuditLog[]
+}
+
+model Membership {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @db.Uuid
+  organizationId String         @db.Uuid
+  role           MembershipRole @default(MEMBER)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model OauthAccount {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @db.Uuid
+  provider              String
+  providerAccountId     String
+  encryptedRefreshToken String?
+  tokenIv               String?
+  tokenAuthTag          String?
+  scopes                String[]
+  expiresAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model DriveConnection {
+  id                         String                @id @default(uuid()) @db.Uuid
+  userId                     String                @db.Uuid
+  organizationId             String                @db.Uuid
+  googleAccountEmail         String
+  rootFolderId               String
+  inboxFolderId              String?
+  processingFolderId         String?
+  reviewFolderId             String?
+  reportsFolderId            String?
+  archiveFolderId            String?
+  serviceAccountPermissionId String?
+  status                     DriveConnectionStatus @default(ACTIVE)
+  scanExistingFiles          Boolean               @default(false)
+  lastScannedAt              DateTime?
+  connectedAt                DateTime              @default(now())
+  disconnectedAt             DateTime?
+  user                       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization               Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  folders                    DriveFolder[]
+  documents                  Document[]
+
+  @@index([organizationId, status])
+  @@index([userId])
+}
+
+model DriveFolder {
+  id                String          @id @default(uuid()) @db.Uuid
+  driveConnectionId String          @db.Uuid
+  driveFolderId     String
+  folderType        String
+  name              String
+  createdAt         DateTime        @default(now())
+  driveConnection   DriveConnection @relation(fields: [driveConnectionId], references: [id], onDelete: Cascade)
+
+  @@unique([driveConnectionId, folderType])
+  @@unique([driveConnectionId, driveFolderId])
+}
+
+model Document {
+  id                String               @id @default(uuid()) @db.Uuid
+  organizationId    String               @db.Uuid
+  driveConnectionId String               @db.Uuid
+  driveFileId       String
+  name              String
+  mimeType          String
+  sizeBytes         BigInt?
+  sha256            String?
+  status            DocumentStatus       @default(NEW)
+  errorCode         String?
+  errorMessage      String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  organization      Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  driveConnection   DriveConnection      @relation(fields: [driveConnectionId], references: [id], onDelete: Restrict)
+  versions          DocumentVersion[]
+  analyses          DocumentAnalysis[]
+  sourceComparisons DocumentComparison[] @relation("SourceDocument")
+  targetComparisons DocumentComparison[] @relation("TargetDocument")
+  reports           GeneratedReport[]
+  tasks             Task[]
+  jobs              Job[]
+
+  @@unique([driveConnectionId, driveFileId])
+  @@index([organizationId, status])
+  @@index([sha256])
+}
+
+model DocumentVersion {
+  id           String    @id @default(uuid()) @db.Uuid
+  documentId   String    @db.Uuid
+  driveFileId  String
+  version      String?
+  sha256       String
+  modifiedTime DateTime?
+  createdAt    DateTime  @default(now())
+  document     Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, sha256])
+}
+
+model DocumentAnalysis {
+  id               String            @id @default(uuid()) @db.Uuid
+  documentId       String            @db.Uuid
+  model            String
+  schemaVersion    String
+  executiveSummary String?
+  result           Json
+  confidence       Float?
+  createdAt        DateTime          @default(now())
+  document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  findings         AnalysisFinding[]
+
+  @@index([documentId, createdAt])
+}
+
+model AnalysisFinding {
+  id         String           @id @default(uuid()) @db.Uuid
+  analysisId String           @db.Uuid
+  type       String
+  title      String
+  detail     String?
+  page       Int?
+  section    String?
+  quote      String?
+  confidence Float?
+  createdAt  DateTime         @default(now())
+  analysis   DocumentAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+
+  @@index([analysisId, type])
+}
+
+model DocumentComparison {
+  id               String   @id @default(uuid()) @db.Uuid
+  sourceDocumentId String   @db.Uuid
+  targetDocumentId String   @db.Uuid
+  result           Json
+  createdAt        DateTime @default(now())
+  sourceDocument   Document @relation("SourceDocument", fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+  targetDocument   Document @relation("TargetDocument", fields: [targetDocumentId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceDocumentId, targetDocumentId])
+}
+
+model ReportTemplate {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  name           String
+  driveFileId    String
+  mimeType       String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reports        GeneratedReport[]
+
+  @@unique([organizationId, driveFileId])
+}
+
+model GeneratedReport {
+  id               String          @id @default(uuid()) @db.Uuid
+  organizationId   String          @db.Uuid
+  documentId       String          @db.Uuid
+  reportTemplateId String?         @db.Uuid
+  driveFileId      String
+  status           String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document         Document        @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reportTemplate   ReportTemplate? @relation(fields: [reportTemplateId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, driveFileId])
+}
+
+model Task {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  documentId     String?          @db.Uuid
+  createdById    String           @db.Uuid
+  title          String
+  description    String?
+  dueAt          DateTime?
+  status         TaskStatus       @default(ASSIGNED)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document       Document?        @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  createdBy      User             @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignees      TaskAssignee[]
+  comments       TaskComment[]
+  attachments    TaskAttachment[]
+
+  @@index([organizationId, status])
+  @@index([dueAt])
+}
+
+model TaskAssignee {
+  id        String           @id @default(uuid()) @db.Uuid
+  taskId    String           @db.Uuid
+  userId    String           @db.Uuid
+  role      TaskAssigneeRole
+  createdAt DateTime         @default(now())
+  task      Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId, role])
+  @@index([userId])
+}
+
+model TaskComment {
+  id        String   @id @default(uuid()) @db.Uuid
+  taskId    String   @db.Uuid
+  userId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([taskId, createdAt])
+}
+
+model TaskAttachment {
+  id          String   @id @default(uuid()) @db.Uuid
+  taskId      String   @db.Uuid
+  driveFileId String
+  name        String
+  mimeType    String
+  createdAt   DateTime @default(now())
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, driveFileId])
+}
+
+model Notification {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  userId         String       @db.Uuid
+  type           String
+  title          String
+  body           String
+  data           Json?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model Device {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @db.Uuid
+  name         String?
+  platform     String
+  pushEndpoint String?   @unique
+  publicKey    String?
+  authSecret   String?
+  lastSeenAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Job {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  documentId     String?      @db.Uuid
+  queue          String
+  jobKey         String       @unique
+  status         JobStatus    @default(PENDING)
+  attempts       Int          @default(0)
+  payload        Json
+  errorMessage   String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  document       Document?    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+}
+
+model AuditLog {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String?       @db.Uuid
+  actorUserId    String?       @db.Uuid
+  action         String
+  entityType     String
+  entityId       String?
+  requestId      String?
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  actorUser      User?         @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([requestId])
+}
