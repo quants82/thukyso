@@ -1,13 +1,17 @@
 import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
-import { loadEnvironment } from "@thukyso/config";
+import { loadApiEnvironment } from "@thukyso/config";
 import { AppModule } from "./app.module.js";
+import type { Express } from "express";
 import { GlobalExceptionFilter } from "./global-exception.filter.js";
 import { requestIdMiddleware } from "./request-id.middleware.js";
 import { requestLoggerMiddleware } from "./request-logger.middleware.js";
 
-const environment = loadEnvironment();
+const environment = loadApiEnvironment();
 const app = await NestFactory.create(AppModule);
+const express = app.getHttpAdapter().getInstance() as Express;
+express.disable("x-powered-by");
+express.set("trust proxy", "loopback");
 app.setGlobalPrefix("api/v1");
 app.enableCors({ origin: environment.APP_URL, credentials: true });
 app.use(requestIdMiddleware);

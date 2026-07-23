@@ -17,7 +17,9 @@
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
     "@thukyso/config": "workspace:*",
+    "cookie": "^1.0.2",
     "express": "^5.1.0",
+    "google-auth-library": "^10.3.0",
     "ioredis": "^5.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
@@ -27,6 +29,7 @@
     "supertest": "^7.1.4",
     "@types/supertest": "^6.0.3",
     "@types/express": "^5.0.3",
+    "@types/cookie": "^0.6.0",
     "tsx": "^4.20.3"
   }
 }

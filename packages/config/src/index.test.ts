@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadEnvironment, redisConnectionOptions } from "./index.js";
+import { loadApiEnvironment, loadEnvironment, redisConnectionOptions } from "./index.js";
 
 describe("loadEnvironment", () => {
   it("parses required infrastructure settings", () => {
@@ -31,6 +31,18 @@ describe("loadEnvironment", () => {
     expect(() => loadEnvironment({}, { loadFile: false })).toThrow(
       "Cấu hình môi trường không hợp lệ"
     );
+  });
+
+  it("validates API security settings separately from worker settings", () => {
+    expect(() =>
+      loadApiEnvironment(
+        {
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
+          REDIS_URL: "redis://localhost:6379/2"
+        },
+        { loadFile: false }
+      )
+    ).toThrow("COOKIE_SECRET");
   });
 });
 

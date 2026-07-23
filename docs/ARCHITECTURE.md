@@ -60,3 +60,21 @@ PostgreSQL      Redis/BullMQ
 - Mọi response có header `x-request-id`; access log và lỗi máy chủ dùng JSON một dòng để có thể đưa vào hệ thống log tập trung.
 - BullMQ dùng `REDIS_PREFIX` và Redis database riêng theo `REDIS_URL`; job nghiệp vụ được bổ sung từ Phase 4.
 - API và worker đóng kết nối sạch khi nhận SIGINT/SIGTERM.
+
+## Xác thực Phase 2
+
+```text
+Browser
+  -> GET /api/v1/auth/google
+  -> Google OAuth (openid email profile)
+  -> GET /api/v1/auth/google/callback
+  -> verify state + nonce + ID token
+  -> upsert User/OauthAccount
+  -> HttpOnly application session cookie
+```
+
+- Google access token và ID token chỉ tồn tại trong callback phía server, không lưu và không gửi xuống frontend.
+- Google refresh token được mã hóa AES-256-GCM theo từng bản ghi với IV và authentication tag riêng.
+- Session token dạng rõ chỉ nằm trong cookie HttpOnly; PostgreSQL chỉ lưu SHA-256 hash.
+- Cookie production là `Secure`, `SameSite=Lax`, host-only và có expiry.
+- Session rotation thu hồi session cũ trong cùng transaction với session mới và audit log.

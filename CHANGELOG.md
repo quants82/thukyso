@@ -14,6 +14,10 @@
 - Thêm BullMQ system queue với Redis database/prefix cô lập.
 - Thêm systemd unit và startup script cô lập cho API/worker trên Linux.
 - Thêm virtual host Nginx riêng cho frontend và API trên `thukyso.vatli365.vn`.
+- Thêm Google OAuth authorization-code flow phía server với state/nonce validation.
+- Thêm session cookie HttpOnly, rotation/revoke và audit log.
+- Thêm mã hóa AES-256-GCM cho Google refresh token.
+- Thêm migration `UserSession` và API `/auth/google`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
 
 ### Changed
 
