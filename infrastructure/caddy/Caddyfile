@@ -1,0 +1,5 @@
+{
+  email {$CADDY_EMAIL}
+}
+
+# Production routes are enabled when web/api containers are added in the deployment phase.
