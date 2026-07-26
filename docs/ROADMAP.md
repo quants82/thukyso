@@ -6,7 +6,7 @@
 | 1 | NestJS, Prisma, health dependencies, logging, BullMQ | Hoàn thành |
 | 2 | Google OAuth server-side | Hoàn thành |
 | 3 | Kết nối thư mục Google Drive với `drive.file` | Hoàn thành |
-| 4 | Worker quét Drive idempotent | Đang triển khai production |
+| 4 | Worker quét Drive idempotent | Hoàn thành |
 | 5 | Pipeline phân tích Gemini | Chưa bắt đầu |
 | 6 | Giao diện quản lý văn bản | Chưa bắt đầu |
 | 7 | So sánh văn bản | Chưa bắt đầu |
@@ -70,5 +70,6 @@ Migration, cấu hình production, Google Picker thật, 9 thư mục chuẩn, d
 - Di chuyển file hợp lệ sang xử lý, file bị từ chối sang thư mục lỗi.
 - Graceful shutdown đóng Queue, Redis và Prisma.
 
-Chỉ đánh dấu hoàn thành sau khi production phát hiện một PDF thật, tạo đúng một Document/Job
-và restart worker không tạo bản ghi trùng. Gemini vẫn thuộc Phase 5.
+Production đã phát hiện một PDF thật, chuyển file từ `00_VAN_BAN_MOI` sang
+`01_DANG_XU_LY`, tạo đúng một Document/DocumentVersion/Job/audit log và không tạo bản ghi
+trùng sau khi restart worker. Job `analyze-document` đang chờ Phase 5; Gemini chưa được gọi.

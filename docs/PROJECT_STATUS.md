@@ -10,7 +10,7 @@ Cập nhật: 27/07/2026
 - Website tạm: `https://thukyso.vatli365.vn`
 - Repository: `https://github.com/quants82/thukyso`
 - Nhánh triển khai: `main`
-- Commit Phase 2 hiện tại: `fa513ca`
+- Phase hiện tại: Phase 4 đã hoàn thành trên production
 
 Sản phẩm không phải dịch vụ chữ ký điện tử.
 
@@ -92,36 +92,41 @@ Production Phase 1 hiện đang hoạt động:
 - Đăng nhập Google thật, `/auth/me`, OAuth account, active session và audit log đã được xác nhận.
 - Client secret chỉ nằm trong file quyền `600` trên server, không lưu trong repository.
 
+### Phase 3 — Google Drive
+
+- OAuth tăng dần chỉ dùng scope `drive.file`.
+- Google Picker chọn thư mục làm việc và từng PDF/DOCX.
+- Đã tạo `THU_KY_SO` cùng đủ 9 thư mục chuẩn.
+- Kết nối, đổi/ngắt thư mục và audit log đã hoạt động trên production.
+
+### Phase 4 — Drive worker
+
+- Worker production quét Drive mỗi 60 giây và quét ngay khi khởi động.
+- Refresh token chỉ được giải mã AES-256-GCM trong worker.
+- Redis lock, unique keys PostgreSQL và BullMQ job ID bảo đảm idempotency.
+- PDF thử nghiệm đã chuyển từ `00_VAN_BAN_MOI` sang `01_DANG_XU_LY`.
+- Production có đúng một Document, DocumentVersion, Job và audit `DOCUMENT_DISCOVERED`.
+- Restart worker không tạo thêm bản ghi.
+- Job `analyze-document` ở trạng thái `PENDING`, chờ pipeline Phase 5.
+
 ## 4. Đang làm
 
-Phase 2 và Phase 3 đã hoàn tất trên production. Mã nguồn Phase 4 đang được kiểm thử trước
-khi triển khai worker production.
-
-Frontend hiện vẫn là trang giới thiệu nền tảng; giao diện trạng thái đăng nhập sẽ được bổ sung trong phase giao diện. Việc trang chủ còn hiển thị nội dung Phase 0 không ảnh hưởng API OAuth đã hoạt động.
+Phase 4 đã hoàn thành. Chưa bắt đầu Phase 5 và chưa gọi Gemini.
 
 ## 5. Bước tiếp theo
 
-Kết quả production Phase 3:
+Triển khai Phase 5 — pipeline phân tích Gemini:
 
-1. Drive API, Picker API và duy nhất scope `drive.file` đã cấu hình.
-2. Service Account không có IAM role cấp project; khóa JSON nằm ngoài repository với quyền `600`.
-3. Migration Phase 3 đã áp dụng; API và frontend production đã build.
-4. Google Picker thật đã chọn `THU_KY_SO_WORKSPACE`.
-5. `THU_KY_SO` và đủ 9 thư mục chuẩn đã được tạo.
-6. Database có một kết nối active, 9 DriveFolder và audit `DRIVE_CONNECTED`.
-
-Bước tiếp theo:
-
-1. Triển khai worker Phase 4 lên production.
-2. Tải một PDF thử nghiệm vào `00_VAN_BAN_MOI`.
-3. Xác nhận file chuyển `01_DANG_XU_LY`, database có đúng một Document/Version/Job.
-4. Restart worker và xác nhận không tạo bản ghi trùng.
-5. Chỉ sau đó đánh dấu Phase 4 hoàn thành; chưa bắt đầu Gemini Phase 5.
+1. Worker tiêu thụ job `analyze-document` đang chờ.
+2. Tải nội dung file bằng OAuth `drive.file` mà không lưu file gốc lâu dài trên server.
+3. Trích xuất PDF/DOCX, gọi Gemini theo schema có kiểm chứng và không tự điền dữ liệu thiếu.
+4. Lưu kết quả phân tích, cập nhật trạng thái job/tài liệu và tạo audit log.
+5. Xử lý retry idempotent, lỗi và dọn sạch dữ liệu tạm.
 
 ## 6. Các phase sau
 
-- Phase 3: kết nối Google Drive với `drive.file`, Google Picker và Service Account.
-- Phase 4: worker quét thư mục Drive idempotent.
+- Phase 3: hoàn thành kết nối Google Drive với `drive.file` và Google Picker.
+- Phase 4: hoàn thành worker quét thư mục Drive idempotent.
 - Phase 5: Gemini phân tích PDF/DOCX.
 - Phase 6: giao diện quản lý văn bản.
 - Phase 7: so sánh văn bản.

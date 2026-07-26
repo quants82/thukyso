@@ -33,3 +33,5 @@
 - Chỉ bind PostgreSQL và Redis local qua `127.0.0.1` trong Docker Compose phát triển.
 - Triển khai Google OAuth Phase 2 trên `thukyso.vatli365.vn` và xác nhận đăng nhập, session, OAuth account cùng audit log trên production.
 - Triển khai Phase 3 trên production và xác nhận Picker, kết nối Drive, 9 thư mục chuẩn cùng audit log.
+- Hoàn tất Phase 4 trên production: PDF thật được phát hiện và chuyển sang xử lý, job được
+  xếp hàng đúng một lần, restart worker không tạo dữ liệu trùng.

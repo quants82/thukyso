@@ -11,7 +11,7 @@ chỉ được kéo/thả thủ công ngoài ứng dụng không thuộc phạm 
 Google Picker chọn PDF/DOCX
   -> backend đưa file vào 00_VAN_BAN_MOI
   -> Redis lock theo DriveConnection
-  -> list file bằng Service Account + drive.file
+  -> list/download file bằng OAuth người dùng + drive.file
   -> kiểm tra PDF/DOCX và giới hạn dung lượng
   -> SHA-256 trong bộ nhớ
   -> transaction Document + DocumentVersion + Job + AuditLog
@@ -54,3 +54,14 @@ job payload hoặc log. Worker chỉ thấy các file cụ thể đã được d
 - Job name Phase 5 sẽ xử lý: `analyze-document`.
 - Khi Phase 5 chưa triển khai, job chờ trong BullMQ và database ở trạng thái `PENDING`.
 - Dừng worker chờ lượt quét hiện tại hoàn tất rồi đóng Queue, Redis và Prisma.
+
+## Xác nhận production
+
+Ngày 27/07/2026, worker đã xử lý một PDF thật:
+
+- File chuyển từ `00_VAN_BAN_MOI` sang `01_DANG_XU_LY`.
+- PostgreSQL có đúng một `Document`, `DocumentVersion`, `Job` và audit
+  `DOCUMENT_DISCOVERED`.
+- Document ở trạng thái `QUEUED`; job `documents/analyze-document` ở trạng thái `PENDING`
+  với `attempts=0`.
+- Restart worker và quét lại không tạo bản ghi trùng.
