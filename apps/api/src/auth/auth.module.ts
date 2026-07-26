@@ -9,6 +9,7 @@ import { OauthStateService } from "./oauth-state.service.js";
 @Module({
   imports: [InfrastructureModule],
   controllers: [AuthController],
-  providers: [AuthRepository, AuthService, GoogleOauthService, OauthStateService]
+  providers: [AuthRepository, AuthService, GoogleOauthService, OauthStateService],
+  exports: [AuthService]
 })
 export class AuthModule {}

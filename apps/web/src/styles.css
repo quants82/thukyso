@@ -14,3 +14,9 @@ h1 { margin: 12px 0 8px; font-size: clamp(2.5rem, 8vw, 5rem); letter-spacing: -.
 p { font-size: 1.25rem; color: #466279; }
 .notice { margin: 32px 0; padding: 18px 20px; border-left: 4px solid #d9a441; background: #fff8e8; line-height: 1.6; }
 small { color: #6b7e8d; }
+.drive-panel { margin: 2rem 0; padding: 1.5rem; border: 1px solid #dbe7e3; border-radius: .75rem; background: #f7fbf9; }
+.actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+button, .button { display: inline-block; border: 0; border-radius: .5rem; padding: .75rem 1rem; color: #fff; background: #047857; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+button.secondary { color: #0f3a51; background: #e2e8f0; }
+button:disabled { cursor: wait; opacity: .6; }
+.status { color: #0f766e; }

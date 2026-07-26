@@ -19,6 +19,9 @@
 - Thêm mã hóa AES-256-GCM cho Google refresh token.
 - Thêm migration `UserSession` và API `/auth/google`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
 - Thêm tài liệu trạng thái dự án, runbook vận hành và danh sách lưu ý quan trọng.
+- Thêm OAuth tăng dần `drive.file`, Google Picker và API quản lý kết nối Drive.
+- Thêm chia sẻ Service Account, cấu trúc 9 thư mục chuẩn và audit log kết nối Drive.
+- Thêm giao diện đăng nhập, chọn, đổi và ngắt thư mục Google Drive.
 
 ### Changed
 

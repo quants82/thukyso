@@ -31,7 +31,7 @@ export class AuthService {
   }
 
   async currentUser(token: string | undefined) {
-    const session = await this.activeSession(token);
+    const session = await this.requireSession(token);
     return {
       id: session.user.id,
       email: session.user.email,
@@ -40,8 +40,13 @@ export class AuthService {
     };
   }
 
+  async requireUser(token: string | undefined) {
+    const session = await this.requireSession(token);
+    return session.user;
+  }
+
   async refresh(token: string | undefined, metadata: RequestMetadata) {
-    const session = await this.activeSession(token);
+    const session = await this.requireSession(token);
     const replacement = this.newSession();
     await this.repository.rotateSession(
       session.id,
@@ -59,7 +64,7 @@ export class AuthService {
     }
   }
 
-  private async activeSession(token: string | undefined) {
+  private async requireSession(token: string | undefined) {
     if (!token) throw new UnauthorizedException("Chưa đăng nhập");
     const session = await this.repository.findActiveSession(hashToken(token));
     if (!session) throw new UnauthorizedException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn");

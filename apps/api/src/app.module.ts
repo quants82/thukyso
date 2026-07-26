@@ -6,9 +6,10 @@ import { PrismaService } from "./prisma.service.js";
 import { RedisService } from "./redis.service.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { InfrastructureModule } from "./infrastructure.module.js";
+import { DriveModule } from "./drive/drive.module.js";
 
 @Module({
-  imports: [InfrastructureModule, AuthModule],
+  imports: [InfrastructureModule, AuthModule, DriveModule],
   controllers: [HealthController],
   providers: [
     HealthService,

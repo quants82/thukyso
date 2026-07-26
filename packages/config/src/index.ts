@@ -17,6 +17,11 @@ const apiEnvironmentSchema = infrastructureEnvironmentSchema.extend({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CALLBACK_URL: z.string().url(),
+  GOOGLE_DRIVE_CALLBACK_URL: z.string().url(),
+  GOOGLE_PICKER_API_KEY: z.string().min(1),
+  GOOGLE_CLOUD_PROJECT_NUMBER: z.string().regex(/^\d+$/),
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().email(),
+  GOOGLE_SERVICE_ACCOUNT_KEY_FILE: z.string().min(1),
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7)
 });
 

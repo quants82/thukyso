@@ -78,3 +78,13 @@ Browser
 - Session token dạng rõ chỉ nằm trong cookie HttpOnly; PostgreSQL chỉ lưu SHA-256 hash.
 - Cookie production là `Secure`, `SameSite=Lax`, host-only và có expiry.
 - Session rotation thu hồi session cũ trong cùng transaction với session mới và audit log.
+
+## Google Drive Phase 3
+
+- OAuth tăng dần chỉ xin `drive.file`; callback Drive độc lập với callback đăng nhập.
+- Google Picker trả về folder ID cụ thể do người dùng chọn.
+- Backend kiểm tra MIME type, `canAddChildren` và `canShare` trước khi kết nối.
+- Thư mục được chia sẻ cho Service Account với quyền writer; Service Account không có IAM role cấp project.
+- Backend tạo idempotent `THU_KY_SO` và 9 thư mục con chuẩn.
+- Đổi/ngắt kết nối gỡ quyền Service Account ở thư mục cũ nhưng không di chuyển hoặc xóa file.
+- Worker polling chưa được triển khai trong Phase 3.

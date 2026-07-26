@@ -52,6 +52,9 @@ export class AuthRepository {
           });
 
       const tokenData = encryptedToken ?? {};
+      const scopes = existingAccount
+        ? [...new Set([...existingAccount.scopes, ...LOGIN_SCOPES])]
+        : [...LOGIN_SCOPES];
       await transaction.oauthAccount.upsert({
         where: {
           provider_providerAccountId: {
@@ -61,7 +64,7 @@ export class AuthRepository {
         },
         update: {
           userId: user.id,
-          scopes: [...LOGIN_SCOPES],
+          scopes,
           expiresAt: identity.expiresAt,
           ...tokenData
         },
@@ -69,7 +72,7 @@ export class AuthRepository {
           userId: user.id,
           provider: GOOGLE_PROVIDER,
           providerAccountId: identity.subject,
-          scopes: [...LOGIN_SCOPES],
+          scopes,
           expiresAt: identity.expiresAt,
           ...tokenData
         }

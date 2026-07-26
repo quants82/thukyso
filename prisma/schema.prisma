@@ -148,6 +148,8 @@ model DriveConnection {
   userId                     String                @db.Uuid
   organizationId             String                @db.Uuid
   googleAccountEmail         String
+  selectedFolderId           String?
+  selectedFolderName         String?
   rootFolderId               String
   inboxFolderId              String?
   processingFolderId         String?
