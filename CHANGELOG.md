@@ -24,6 +24,7 @@
 - Thêm giao diện đăng nhập, chọn, đổi và ngắt thư mục Google Drive.
 - Thêm Drive worker polling, Redis lock và chuỗi khóa idempotent từ Drive tới BullMQ.
 - Thêm kiểm tra PDF/DOCX, giới hạn dung lượng, SHA-256 và phân luồng file lỗi.
+- Thêm luồng chọn file qua Google Picker để giữ quyền Drive ở `drive.file`.
 
 ### Changed
 

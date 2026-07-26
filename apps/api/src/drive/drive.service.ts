@@ -59,6 +59,29 @@ export class DriveService {
     };
   }
 
+  async queueFiles(userId: string, fileIds: unknown) {
+    if (
+      !Array.isArray(fileIds) ||
+      fileIds.length < 1 ||
+      fileIds.length > 10 ||
+      fileIds.some((id) => typeof id !== "string" || id.length < 1 || id.length > 200)
+    ) {
+      throw new BadRequestException("Danh sách file không hợp lệ");
+    }
+    const connection = await this.repository.activeConnection(userId);
+    if (!connection?.inboxFolderId) {
+      throw new BadRequestException("Chưa kết nối thư mục Google Drive");
+    }
+    const refreshToken = await this.refreshToken(userId);
+    const files = [];
+    for (const fileId of fileIds as string[]) {
+      files.push(
+        await this.google.prepareFileForInbox(refreshToken, fileId, connection.inboxFolderId)
+      );
+    }
+    return { queued: files.length };
+  }
+
   async connectFolder(
     user: { id: string; email: string },
     input: { folderId?: string; scanExistingFiles?: boolean },

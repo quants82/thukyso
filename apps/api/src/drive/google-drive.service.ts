@@ -12,8 +12,14 @@ interface DriveFile {
   id: string;
   name: string;
   mimeType: string;
+  parents?: string[];
   capabilities?: { canAddChildren?: boolean; canShare?: boolean };
 }
+
+const PROCESSABLE_MIME_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+] as const;
 
 @Injectable()
 export class GoogleDriveService {
@@ -99,6 +105,36 @@ export class GoogleDriveService {
         })
       }
     );
+  }
+
+  async prepareFileForInbox(refreshToken: string, fileId: string, inboxFolderId: string) {
+    const file = await this.request<DriveFile>(
+      refreshToken,
+      `/files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,parents,capabilities(canShare)&supportsAllDrives=true`
+    );
+    if (!PROCESSABLE_MIME_TYPES.includes(file.mimeType as (typeof PROCESSABLE_MIME_TYPES)[number])) {
+      throw new BadRequestException("Chỉ chấp nhận PDF hoặc DOCX");
+    }
+    if (!file.capabilities?.canShare) {
+      throw new BadRequestException("File cần quyền chia sẻ cho worker");
+    }
+    const removeParents = (file.parents ?? [])
+      .filter((parentId) => parentId !== inboxFolderId)
+      .join(",");
+    const parentQuery = removeParents
+      ? `&removeParents=${encodeURIComponent(removeParents)}`
+      : "";
+    await this.request(
+      refreshToken,
+      `/files/${encodeURIComponent(file.id)}?addParents=${encodeURIComponent(inboxFolderId)}${parentQuery}&fields=id,parents,appProperties&supportsAllDrives=true`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          appProperties: { thukysoQueuedAt: new Date().toISOString() }
+        })
+      }
+    );
+    return { id: file.id, name: file.name, mimeType: file.mimeType };
   }
 
   async removePermission(refreshToken: string, folderId: string, permissionId: string) {

@@ -2,11 +2,14 @@
 
 ## Phạm vi
 
-Worker quét `00_VAN_BAN_MOI` mỗi 60 giây bằng Service Account. Phase 4 chỉ phát hiện,
-đăng ký và xếp hàng tài liệu; không gọi Gemini và không phân tích nội dung.
+Worker quét `00_VAN_BAN_MOI` mỗi 60 giây bằng Service Account. Để giữ duy nhất scope
+`drive.file`, người dùng chọn PDF/DOCX cụ thể qua Google Picker; backend đánh dấu file bằng
+`appProperties` và đưa vào inbox. File chỉ được kéo/thả thủ công ngoài ứng dụng không thuộc
+phạm vi `drive.file` và không được worker nhìn thấy.
 
 ```text
-00_VAN_BAN_MOI
+Google Picker chọn PDF/DOCX
+  -> backend đưa file vào 00_VAN_BAN_MOI
   -> Redis lock theo DriveConnection
   -> list file bằng Service Account + drive.file
   -> kiểm tra PDF/DOCX và giới hạn dung lượng
@@ -40,7 +43,7 @@ MAX_DOCUMENT_SIZE_MB=25
 ```
 
 Service Account JSON nằm ngoài repository với quyền `600`. Service Account chỉ nhìn thấy
-thư mục đã được người dùng chia sẻ ở Phase 3.
+thư mục và các file cụ thể đã được dùng với ứng dụng.
 
 ## Vận hành
 

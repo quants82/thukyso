@@ -94,6 +94,12 @@ export class DriveController {
     return this.drive.connectFolder(user, body, this.metadata(request, response));
   }
 
+  @Post("queue-files")
+  async queueFiles(@Body() body: { fileIds?: unknown }, @Req() request: Request) {
+    const user = await this.auth.requireUser(this.sessionToken(request));
+    return this.drive.queueFiles(user.id, body.fileIds);
+  }
+
   @Get("connection")
   async connection(@Req() request: Request) {
     const user = await this.auth.requireUser(this.sessionToken(request));

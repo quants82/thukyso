@@ -12,6 +12,7 @@ export interface DriveFile {
   size?: string;
   createdTime?: string;
   modifiedTime?: string;
+  appProperties?: Record<string, string>;
 }
 
 export class DriveClient {
@@ -28,7 +29,7 @@ export class DriveClient {
       const query = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
       const tokenQuery = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
       const page = await this.request<{ files?: DriveFile[]; nextPageToken?: string }>(
-        `/files?q=${query}&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime)&pageSize=100&orderBy=createdTime${tokenQuery}`
+        `/files?q=${query}&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,appProperties)&pageSize=100&orderBy=createdTime${tokenQuery}`
       );
       files.push(...(page.files ?? []));
       pageToken = page.nextPageToken;

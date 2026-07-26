@@ -20,12 +20,42 @@ interface PickerBuilder {
 
 interface GooglePickerApi {
   Action: { PICKED: string; CANCEL: string };
-  ViewId: { FOLDERS: string };
+  ViewId: { FOLDERS: string; DOCS: string };
   DocsView: new (viewId: string) => {
     setIncludeFolders(value: boolean): unknown;
     setSelectFolderEnabled(value: boolean): unknown;
+    setMimeTypes(value: string): unknown;
   };
   PickerBuilder: new () => PickerBuilder;
+}
+
+export async function chooseDriveFile(configuration: {
+  accessToken: string;
+  apiKey: string;
+  appId: string;
+}) {
+  await loadPickerApi();
+  return new Promise<PickerDocument | null>((resolve) => {
+    const view = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS);
+    view.setMimeTypes(
+      "application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
+    new window.google.picker.PickerBuilder()
+      .addView(view)
+      .setOAuthToken(configuration.accessToken)
+      .setDeveloperKey(configuration.apiKey)
+      .setAppId(configuration.appId)
+      .setOrigin(window.location.origin)
+      .setCallback((data) => {
+        if (data.action === window.google.picker.Action.PICKED) {
+          resolve(data.docs?.[0] ?? null);
+        } else if (data.action === window.google.picker.Action.CANCEL) {
+          resolve(null);
+        }
+      })
+      .build()
+      .setVisible(true);
+  });
 }
 
 declare global {

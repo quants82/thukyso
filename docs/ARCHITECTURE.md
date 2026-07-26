@@ -92,6 +92,8 @@ Browser
 ## Drive Worker Phase 4
 
 - Polling mỗi 60 giây bằng Service Account và scope `drive.file`.
+- File đầu vào phải được chọn cụ thể qua Google Picker; backend đưa file vào inbox và gắn
+  `appProperties`, vì `drive.file` không liệt kê file được kéo/thả ngoài ứng dụng.
 - Redis lock theo DriveConnection; database và BullMQ dùng khóa xác định chống trùng.
 - Chỉ chấp nhận PDF/DOCX trong giới hạn dung lượng; SHA-256 được tính trong bộ nhớ.
 - File hợp lệ chuyển sang `01_DANG_XU_LY`; file sai định dạng/quá lớn chuyển `99_LOI_XU_LY`.

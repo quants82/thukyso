@@ -72,4 +72,26 @@ describe("DriveService", () => {
     );
     expect(result.folders).toHaveLength(9);
   });
+
+  it("moves only Picker-selected files into the connected inbox", async () => {
+    const repository = {
+      activeConnection: vi.fn().mockResolvedValue({ inboxFolderId: "inbox" })
+    };
+    const google = {
+      prepareFileForInbox: vi.fn().mockResolvedValue({
+        id: "file-1",
+        name: "test.pdf",
+        mimeType: "application/pdf"
+      })
+    };
+    const service = new DriveService(repository as never, google as never);
+    Reflect.set(service, "refreshToken", vi.fn().mockResolvedValue("refresh-token"));
+
+    await expect(service.queueFiles("user-1", ["file-1"])).resolves.toEqual({ queued: 1 });
+    expect(google.prepareFileForInbox).toHaveBeenCalledWith(
+      "refresh-token",
+      "file-1",
+      "inbox"
+    );
+  });
 });

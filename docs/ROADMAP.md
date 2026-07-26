@@ -63,6 +63,7 @@ Migration, cấu hình production, Google Picker thật, 9 thư mục chuẩn, d
 ## Kết quả mã nguồn Phase 4
 
 - Polling Drive mỗi 60 giây bằng Service Account.
+- Google Picker cấp quyền theo từng PDF/DOCX trước khi backend đưa file vào inbox.
 - Redis lock, unique keys database và BullMQ job ID xác định bảo đảm idempotency.
 - Chỉ nhận PDF/DOCX, giới hạn dung lượng và tính SHA-256 trong bộ nhớ.
 - Transaction tạo Document, DocumentVersion, Job và audit log.

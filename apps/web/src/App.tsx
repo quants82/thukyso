@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { chooseDriveFolder } from "./google-picker";
+import { chooseDriveFile, chooseDriveFolder } from "./google-picker";
 
 interface User {
   displayName?: string;
@@ -107,6 +107,29 @@ export function App() {
     }
   }
 
+  async function queueFile() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const configuration = await api<{
+        accessToken: string;
+        apiKey: string;
+        appId: string;
+      }>("/drive/picker-token");
+      const file = await chooseDriveFile(configuration);
+      if (!file) return;
+      await api("/drive/queue-files", {
+        method: "POST",
+        body: JSON.stringify({ fileIds: [file.id] })
+      });
+      setMessage("Đã đưa file vào hàng đợi xử lý.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Không thể đưa file vào xử lý");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="shell">
       <section className="card">
@@ -128,6 +151,7 @@ export function App() {
                 <p>Drive đang kết nối: <strong>{connection.selectedFolderName ?? "Thư mục Google Drive"}</strong></p>
                 <p>{connection.folders.length} thư mục chuẩn đã sẵn sàng.</p>
                 <div className="actions">
+                  <button disabled={busy} onClick={() => void queueFile()}>Chọn PDF/DOCX</button>
                   <button disabled={busy} onClick={() => void openPicker()}>Đổi thư mục</button>
                   <button className="secondary" disabled={busy} onClick={() => void disconnect()}>Ngắt kết nối</button>
                 </div>

@@ -28,6 +28,7 @@ export class DriveScanner {
     for (const file of files) {
       if (
         !connection.scanExistingFiles &&
+        !file.appProperties?.thukysoQueuedAt &&
         file.createdTime &&
         new Date(file.createdTime) < connection.connectedAt
       ) {
