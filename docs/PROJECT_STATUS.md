@@ -1,6 +1,6 @@
 # Trạng thái dự án Thư Ký Số
 
-Cập nhật: 23/07/2026
+Cập nhật: 27/07/2026
 
 ## 1. Tổng quan
 
@@ -70,9 +70,9 @@ Production Phase 1 hiện đang hoạt động:
 - API chỉ bind `127.0.0.1:3020`.
 - Hai service `thukyso-api` và `thukyso-worker` đang enabled.
 
-### Phase 2 — Google OAuth trong mã nguồn
+### Phase 2 — Google OAuth
 
-Đã triển khai và push commit `fa513ca`:
+Đã triển khai mã nguồn ở commit `fa513ca` và đưa lên production:
 
 - Authorization-code flow phía server.
 - Scope đăng nhập chỉ gồm `openid email profile`.
@@ -85,56 +85,28 @@ Production Phase 1 hiện đang hoạt động:
 - Migration thêm bảng `UserSession`.
 - Các endpoint `/auth/google`, `/auth/google/callback`, `/auth/refresh`, `/auth/logout`, `/auth/me`.
 - Lint, typecheck, build, Prisma validation và 17 test đã vượt qua.
+- Google Cloud project: `thu-ky-so-dev`.
+- OAuth Client loại Web application dùng origin và callback HTTPS của `thukyso.vatli365.vn`.
+- Migration `20260723141000_phase_2_auth_sessions` đã áp dụng thành công trên production.
+- API Phase 2 đang chạy bằng `thukyso-api.service`.
+- Đăng nhập Google thật, `/auth/me`, OAuth account, active session và audit log đã được xác nhận.
+- Client secret chỉ nằm trong file quyền `600` trên server, không lưu trong repository.
 
 ## 4. Đang làm
 
-Phase 2 chưa hoàn tất trên production.
+Phase 2 đã hoàn tất trên production. Chưa bắt đầu triển khai Phase 3.
 
-Trạng thái chính xác:
-
-1. Mã Phase 2 đã ở GitHub.
-2. Server vẫn đang chạy bản Phase 1 ổn định.
-3. Chưa pull commit Phase 2 xuống server.
-4. Chưa áp dụng migration `UserSession` trên production.
-5. Chưa tạo Google Cloud project/OAuth Client.
-6. Chưa thêm `GOOGLE_CLIENT_ID` và `GOOGLE_CLIENT_SECRET` thật vào `.env`.
-7. Chưa restart API bằng mã Phase 2.
-8. Chưa kiểm thử đăng nhập Google thật.
-
-Lý do dừng đúng thời điểm này: API Phase 2 yêu cầu Google credentials khi khởi động. Không được cập nhật/restart server trước khi credentials sẵn sàng, để tránh downtime.
+Frontend hiện vẫn là trang giới thiệu nền tảng; giao diện trạng thái đăng nhập sẽ được bổ sung trong phase giao diện. Việc trang chủ còn hiển thị nội dung Phase 0 không ảnh hưởng API OAuth đã hoạt động.
 
 ## 5. Bước tiếp theo
 
-Thực hiện từng bước, không gộp:
+Chuẩn bị Phase 3 theo đúng phạm vi `docs/ROADMAP.md`:
 
-1. Tạo Google Cloud project phát triển, đề xuất tên `Thư Ký Số Dev`.
-2. Cấu hình OAuth consent screen.
-3. Tạo OAuth Client loại **Web application**.
-4. Thêm origin:
-
-   ```text
-   https://thukyso.vatli365.vn
-   ```
-
-5. Thêm redirect URI:
-
-   ```text
-   https://thukyso.vatli365.vn/api/v1/auth/google/callback
-   ```
-
-6. Lưu Client ID/Client Secret vào `.env` trên server, không gửi qua chat và không commit.
-7. Pull `main` trên server.
-8. Chạy `pnpm install --frozen-lockfile`.
-9. Chạy `pnpm prisma:generate`.
-10. Kiểm tra `prisma migrate status`.
-11. Chạy `pnpm prisma:deploy`.
-12. Chạy `pnpm check`.
-13. Build và restart riêng `thukyso-api`; worker chỉ restart nếu dependency thay đổi yêu cầu.
-14. Kiểm tra health.
-15. Kiểm thử OAuth thật.
-16. Kiểm tra audit log, session cookie và database không chứa token dạng rõ.
-
-Sau khi Phase 2 production hoàn tất mới bắt đầu Phase 3.
+1. Chốt luồng Google Picker và cách người dùng chọn thư mục do ứng dụng quản lý.
+2. Chỉ yêu cầu Drive scope `drive.file`; tuyệt đối không xin scope toàn phần.
+3. Xác định cấu hình Service Account riêng cho tác vụ worker.
+4. Thiết kế lưu `DriveConnection` và quyền truy cập trước khi sửa mã.
+5. Triển khai, kiểm thử và cập nhật tài liệu Phase 3; chưa triển khai worker polling của Phase 4.
 
 ## 6. Các phase sau
 
