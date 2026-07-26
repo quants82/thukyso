@@ -24,7 +24,10 @@ export class DriveScanner {
   }
 
   private async scanConnection(connection: ScannableConnection) {
-    const files = await this.drive.listInboxFiles(connection.inboxFolderId);
+    const files = await this.drive.listInboxFiles(
+      connection.inboxFolderId,
+      connection.refreshToken
+    );
     for (const file of files) {
       if (
         !connection.scanExistingFiles &&
@@ -56,7 +59,7 @@ export class DriveScanner {
     }
     let sha256: string;
     try {
-      sha256 = await this.drive.sha256(file.id, this.maxBytes);
+      sha256 = await this.drive.sha256(file.id, this.maxBytes, connection.refreshToken);
     } catch (error) {
       if (error instanceof Error && error.message === "FILE_TOO_LARGE") {
         await this.rejectAndMove(connection, file, "FILE_TOO_LARGE");
@@ -70,7 +73,8 @@ export class DriveScanner {
     await this.drive.moveFile(
       file.id,
       connection.inboxFolderId,
-      connection.processingFolderId
+      connection.processingFolderId,
+      connection.refreshToken
     );
   }
 
@@ -80,7 +84,12 @@ export class DriveScanner {
     code: string
   ) {
     await this.repository.reject(connection, file, code);
-    await this.drive.moveFile(file.id, connection.inboxFolderId, connection.errorFolderId);
+    await this.drive.moveFile(
+      file.id,
+      connection.inboxFolderId,
+      connection.errorFolderId,
+      connection.refreshToken
+    );
   }
 
   private async withLock(connectionId: string, action: () => Promise<void>) {

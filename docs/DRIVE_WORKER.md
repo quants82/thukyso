@@ -2,10 +2,10 @@
 
 ## Phạm vi
 
-Worker quét `00_VAN_BAN_MOI` mỗi 60 giây bằng Service Account. Để giữ duy nhất scope
-`drive.file`, người dùng chọn PDF/DOCX cụ thể qua Google Picker; backend đánh dấu file bằng
-`appProperties` và đưa vào inbox. File chỉ được kéo/thả thủ công ngoài ứng dụng không thuộc
-phạm vi `drive.file` và không được worker nhìn thấy.
+Worker quét `00_VAN_BAN_MOI` mỗi 60 giây bằng OAuth người dùng. Refresh token được giải mã
+chỉ trong tiến trình worker. Để giữ duy nhất scope `drive.file`, người dùng chọn PDF/DOCX
+cụ thể qua Google Picker; backend đánh dấu file bằng `appProperties` và đưa vào inbox. File
+chỉ được kéo/thả thủ công ngoài ứng dụng không thuộc phạm vi `drive.file`.
 
 ```text
 Google Picker chọn PDF/DOCX
@@ -37,13 +37,15 @@ tính SHA-256 rồi giải phóng sau lượt quét.
 ## Cấu hình
 
 ```env
-GOOGLE_SERVICE_ACCOUNT_KEY_FILE=/absolute/path/to/google_service_account.json
+TOKEN_ENCRYPTION_KEY=64-hex-characters
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 WORKER_SCAN_INTERVAL_MS=60000
 MAX_DOCUMENT_SIZE_MB=25
 ```
 
-Service Account JSON nằm ngoài repository với quyền `600`. Service Account chỉ nhìn thấy
-thư mục và các file cụ thể đã được dùng với ứng dụng.
+Google refresh token luôn được mã hóa AES-256-GCM trong PostgreSQL, không xuất hiện trong
+job payload hoặc log. Worker chỉ thấy các file cụ thể đã được dùng với ứng dụng.
 
 ## Vận hành
 

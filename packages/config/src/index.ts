@@ -26,7 +26,9 @@ const apiEnvironmentSchema = infrastructureEnvironmentSchema.extend({
 });
 
 const workerEnvironmentSchema = infrastructureEnvironmentSchema.extend({
-  GOOGLE_SERVICE_ACCOUNT_KEY_FILE: z.string().min(1),
+  TOKEN_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/),
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
   WORKER_SCAN_INTERVAL_MS: z.coerce.number().int().min(30_000).max(300_000).default(60_000),
   MAX_DOCUMENT_SIZE_MB: z.coerce.number().int().min(1).max(100).default(25)
 });

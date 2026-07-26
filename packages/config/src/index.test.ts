@@ -57,14 +57,17 @@ describe("loadEnvironment", () => {
           NODE_ENV: "test",
           DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
           REDIS_URL: "redis://localhost:6379/2",
-          GOOGLE_SERVICE_ACCOUNT_KEY_FILE: "/secure/service-account.json",
+          TOKEN_ENCRYPTION_KEY:
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          GOOGLE_CLIENT_ID: "client-id",
+          GOOGLE_CLIENT_SECRET: "client-secret",
           WORKER_SCAN_INTERVAL_MS: "60000",
           MAX_DOCUMENT_SIZE_MB: "25"
         },
         { loadFile: false }
       )
     ).toMatchObject({
-      GOOGLE_SERVICE_ACCOUNT_KEY_FILE: "/secure/service-account.json",
+      GOOGLE_CLIENT_ID: "client-id",
       WORKER_SCAN_INTERVAL_MS: 60000,
       MAX_DOCUMENT_SIZE_MB: 25
     });

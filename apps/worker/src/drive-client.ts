@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
-import { GoogleAuth } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 
-const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const PDF_MIME = "application/pdf";
 const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
@@ -16,19 +15,19 @@ export interface DriveFile {
 }
 
 export class DriveClient {
-  private readonly auth: GoogleAuth;
+  constructor(
+    private readonly clientId: string,
+    private readonly clientSecret: string
+  ) {}
 
-  constructor(keyFile: string) {
-    this.auth = new GoogleAuth({ keyFile, scopes: [DRIVE_SCOPE] });
-  }
-
-  async listInboxFiles(folderId: string) {
+  async listInboxFiles(folderId: string, refreshToken: string) {
     const files: DriveFile[] = [];
     let pageToken: string | undefined;
     do {
       const query = encodeURIComponent(`'${folderId}' in parents and trashed = false`);
       const tokenQuery = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
       const page = await this.request<{ files?: DriveFile[]; nextPageToken?: string }>(
+        refreshToken,
         `/files?q=${query}&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,appProperties)&pageSize=100&orderBy=createdTime${tokenQuery}`
       );
       files.push(...(page.files ?? []));
@@ -41,8 +40,11 @@ export class DriveClient {
     return file.mimeType === PDF_MIME || file.mimeType === DOCX_MIME;
   }
 
-  async sha256(fileId: string, maxBytes: number) {
-    const response = await this.fetch(`/files/${encodeURIComponent(fileId)}?alt=media`);
+  async sha256(fileId: string, maxBytes: number, refreshToken: string) {
+    const response = await this.fetch(
+      refreshToken,
+      `/files/${encodeURIComponent(fileId)}?alt=media`
+    );
     const declaredSize = Number(response.headers.get("content-length") ?? 0);
     if (declaredSize > maxBytes) throw new Error("FILE_TOO_LARGE");
     const bytes = new Uint8Array(await response.arrayBuffer());
@@ -50,23 +52,34 @@ export class DriveClient {
     return createHash("sha256").update(bytes).digest("hex");
   }
 
-  async moveFile(fileId: string, fromFolderId: string, toFolderId: string) {
+  async moveFile(
+    fileId: string,
+    fromFolderId: string,
+    toFolderId: string,
+    refreshToken: string
+  ) {
     await this.request(
+      refreshToken,
       `/files/${encodeURIComponent(fileId)}?addParents=${encodeURIComponent(toFolderId)}&removeParents=${encodeURIComponent(fromFolderId)}&fields=id,parents&supportsAllDrives=true`,
       { method: "PATCH", body: "{}" }
     );
   }
 
-  private async request<T = unknown>(path: string, init: RequestInit = {}) {
-    const response = await this.fetch(path, init);
+  private async request<T = unknown>(
+    refreshToken: string,
+    path: string,
+    init: RequestInit = {}
+  ) {
+    const response = await this.fetch(refreshToken, path, init);
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }
 
-  private async fetch(path: string, init: RequestInit = {}) {
-    const client = await this.auth.getClient();
+  private async fetch(refreshToken: string, path: string, init: RequestInit = {}) {
+    const client = new OAuth2Client(this.clientId, this.clientSecret);
+    client.setCredentials({ refresh_token: refreshToken });
     const token = await client.getAccessToken();
-    if (!token.token) throw new Error("Không thể tạo Service Account access token");
+    if (!token.token) throw new Error("Không thể tạo OAuth Drive access token");
     const response = await fetch(`https://www.googleapis.com/drive/v3${path}`, {
       ...init,
       headers: {

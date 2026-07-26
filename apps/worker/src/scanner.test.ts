@@ -8,7 +8,8 @@ const connection = {
   processingFolderId: "processing",
   errorFolderId: "errors",
   connectedAt: new Date("2026-07-27T00:00:00Z"),
-  scanExistingFiles: false
+  scanExistingFiles: false,
+  refreshToken: "refresh-token"
 };
 
 function redisStub() {
@@ -59,7 +60,12 @@ describe("DriveScanner", () => {
       { documentId: "document-1" },
       { jobId: expect.stringMatching(/^[a-f0-9]{64}$/) }
     );
-    expect(drive.moveFile).toHaveBeenCalledWith("file-1", "inbox", "processing");
+    expect(drive.moveFile).toHaveBeenCalledWith(
+      "file-1",
+      "inbox",
+      "processing",
+      "refresh-token"
+    );
     expect(repository.scanned).toHaveBeenCalledWith("connection-1");
   });
 
@@ -97,7 +103,12 @@ describe("DriveScanner", () => {
       file,
       "UNSUPPORTED_MIME_TYPE"
     );
-    expect(drive.moveFile).toHaveBeenCalledWith("file-2", "inbox", "errors");
+    expect(drive.moveFile).toHaveBeenCalledWith(
+      "file-2",
+      "inbox",
+      "errors",
+      "refresh-token"
+    );
     expect(queue.add).not.toHaveBeenCalled();
   });
 

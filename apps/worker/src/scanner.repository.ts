@@ -1,5 +1,6 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
 import type { DriveFile } from "./drive-client.js";
+import { decryptRefreshToken } from "./token-crypto.js";
 
 export interface ScannableConnection {
   id: string;
@@ -9,10 +10,14 @@ export interface ScannableConnection {
   errorFolderId: string;
   connectedAt: Date;
   scanExistingFiles: boolean;
+  refreshToken: string;
 }
 
 export class ScannerRepository {
-  constructor(readonly prisma = new PrismaClient()) {}
+  constructor(
+    private readonly encryptionKey: string,
+    readonly prisma = new PrismaClient()
+  ) {}
 
   async connections(): Promise<ScannableConnection[]> {
     const connections = await this.prisma.driveConnection.findMany({
@@ -32,15 +37,50 @@ export class ScannerRepository {
           where: { folderType: "ERROR" },
           select: { driveFolderId: true },
           take: 1
+        },
+        user: {
+          select: {
+            oauthAccounts: {
+              where: {
+                provider: "google",
+                scopes: { has: "https://www.googleapis.com/auth/drive.file" }
+              },
+              select: {
+                encryptedRefreshToken: true,
+                tokenIv: true,
+                tokenAuthTag: true
+              },
+              take: 1
+            }
+          }
         }
       }
     });
     return connections
-      .filter((connection) => connection.folders[0])
-      .map(({ folders, ...connection }) => ({
-        ...connection,
-        errorFolderId: folders[0]!.driveFolderId
-      })) as ScannableConnection[];
+      .filter((connection) => {
+        const account = connection.user.oauthAccounts[0];
+        return (
+          connection.folders[0] &&
+          account?.encryptedRefreshToken &&
+          account.tokenIv &&
+          account.tokenAuthTag
+        );
+      })
+      .map(({ folders, user, ...connection }) => {
+        const account = user.oauthAccounts[0]!;
+        return {
+          ...connection,
+          errorFolderId: folders[0]!.driveFolderId,
+          refreshToken: decryptRefreshToken(
+            {
+              ciphertext: account.encryptedRefreshToken!,
+              iv: account.tokenIv!,
+              authTag: account.tokenAuthTag!
+            },
+            this.encryptionKey
+          )
+        };
+      }) as ScannableConnection[];
   }
 
   async register(

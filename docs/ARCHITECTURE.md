@@ -38,7 +38,8 @@ PostgreSQL      Redis/BullMQ
 - PostgreSQL lưu dữ liệu nghiệp vụ; file gốc nằm trên Google Drive.
 - Chỉ yêu cầu `openid email profile` khi đăng nhập và `drive.file` khi kết nối Drive.
 - Refresh token được mã hóa AES-256-GCM; không chuyển Google token cho frontend.
-- Service Account đọc/quét/di chuyển file; OAuth token người dùng tạo Docs/Sheets.
+- OAuth `drive.file` của người dùng đọc/quét/di chuyển các file đã chọn bằng Picker và tạo
+  Docs/Sheets. Service Account không được worker Phase 4 dùng để vượt giới hạn scope.
 - Worker phải idempotent dựa trên Drive file ID, checksum và khóa job.
 - Không cache toàn bộ PDF nội bộ trên điện thoại.
 
@@ -91,7 +92,8 @@ Browser
 
 ## Drive Worker Phase 4
 
-- Polling mỗi 60 giây bằng Service Account và scope `drive.file`.
+- Polling mỗi 60 giây bằng OAuth người dùng và scope `drive.file`; refresh token chỉ được
+  giải mã trong worker.
 - File đầu vào phải được chọn cụ thể qua Google Picker; backend đưa file vào inbox và gắn
   `appProperties`, vì `drive.file` không liệt kê file được kéo/thả ngoài ứng dụng.
 - Redis lock theo DriveConnection; database và BullMQ dùng khóa xác định chống trùng.

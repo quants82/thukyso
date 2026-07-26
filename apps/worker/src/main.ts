@@ -9,9 +9,9 @@ import { workerStatus } from "./status.js";
 const environment = loadWorkerEnvironment();
 const queue = createDocumentQueue(environment.REDIS_URL, environment.REDIS_PREFIX);
 const redis = new Redis(redisConnectionOptions(environment.REDIS_URL));
-const repository = new ScannerRepository();
+const repository = new ScannerRepository(environment.TOKEN_ENCRYPTION_KEY);
 const scanner = new DriveScanner(
-  new DriveClient(environment.GOOGLE_SERVICE_ACCOUNT_KEY_FILE),
+  new DriveClient(environment.GOOGLE_CLIENT_ID, environment.GOOGLE_CLIENT_SECRET),
   repository,
   queue,
   redis,
