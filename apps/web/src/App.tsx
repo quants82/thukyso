@@ -24,7 +24,8 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(body?.message ?? `API lỗi ${response.status}`);
   }
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+  const text = await response.text();
+  return (text ? JSON.parse(text) : null) as T;
 }
 
 export function App() {
@@ -41,7 +42,9 @@ export function App() {
     api<User>("/auth/me")
       .then(async (currentUser) => {
         setUser(currentUser);
-        await loadConnection();
+        await loadConnection().catch((error: unknown) => {
+          setMessage(error instanceof Error ? error.message : "Không tải được trạng thái Drive");
+        });
       })
       .catch(() => setUser(null));
   }, [loadConnection]);
