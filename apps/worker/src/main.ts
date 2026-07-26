@@ -1,7 +1,11 @@
 import { loadWorkerEnvironment, redisConnectionOptions } from "@thukyso/config";
+import { GeminiInteractionsClient } from "@thukyso/gemini";
+import { Worker } from "bullmq";
 import Redis from "ioredis";
+import { AnalysisProcessor } from "./analysis.processor.js";
+import { AnalysisRepository } from "./analysis.repository.js";
 import { DriveClient } from "./drive-client.js";
-import { createDocumentQueue } from "./queue.js";
+import { createDocumentQueue, DOCUMENT_QUEUE_NAME } from "./queue.js";
 import { DriveScanner } from "./scanner.js";
 import { ScannerRepository } from "./scanner.repository.js";
 import { workerStatus } from "./status.js";
@@ -10,19 +14,52 @@ const environment = loadWorkerEnvironment();
 const queue = createDocumentQueue(environment.REDIS_URL, environment.REDIS_PREFIX);
 const redis = new Redis(redisConnectionOptions(environment.REDIS_URL));
 const repository = new ScannerRepository(environment.TOKEN_ENCRYPTION_KEY);
+const analysisRepository = new AnalysisRepository(environment.TOKEN_ENCRYPTION_KEY);
+const drive = new DriveClient(
+  environment.GOOGLE_CLIENT_ID,
+  environment.GOOGLE_CLIENT_SECRET
+);
 const scanner = new DriveScanner(
-  new DriveClient(environment.GOOGLE_CLIENT_ID, environment.GOOGLE_CLIENT_SECRET),
+  drive,
   repository,
   queue,
   redis,
   environment.REDIS_PREFIX,
   environment.MAX_DOCUMENT_SIZE_MB * 1024 * 1024
 );
+const analysisProcessor = new AnalysisProcessor(
+  drive,
+  analysisRepository,
+  new GeminiInteractionsClient(environment.GEMINI_API_KEY, environment.GEMINI_MODEL),
+  environment.GEMINI_MODEL,
+  environment.MAX_DOCUMENT_SIZE_MB * 1024 * 1024,
+  environment.MAX_EXTRACTED_TEXT_CHARS
+);
+const analysisWorker = new Worker(
+  DOCUMENT_QUEUE_NAME,
+  (job) => analysisProcessor.process(job),
+  {
+    connection: redisConnectionOptions(environment.REDIS_URL),
+    prefix: environment.REDIS_PREFIX,
+    concurrency: environment.WORKER_CONCURRENCY
+  }
+);
+analysisWorker.on("error", (error) => {
+  console.error("Analysis worker error", {
+    error: error instanceof Error ? error.message : "UNKNOWN_WORKER_ERROR"
+  });
+});
 
-await Promise.all([queue.waitUntilReady(), redis.ping()]);
+await Promise.all([
+  queue.waitUntilReady(),
+  analysisWorker.waitUntilReady(),
+  redis.ping()
+]);
 console.log("Thư Ký Số worker", {
   ...workerStatus(true),
-  scanIntervalMs: environment.WORKER_SCAN_INTERVAL_MS
+  scanIntervalMs: environment.WORKER_SCAN_INTERVAL_MS,
+  analysisConcurrency: environment.WORKER_CONCURRENCY,
+  geminiModel: environment.GEMINI_MODEL
 });
 
 let activeScan: Promise<void> | undefined;
@@ -47,7 +84,13 @@ async function shutdown() {
   shuttingDown = true;
   clearInterval(timer);
   await activeScan;
-  await Promise.all([queue.close(), redis.quit(), repository.close()]);
+  await analysisWorker.close();
+  await Promise.all([
+    queue.close(),
+    redis.quit(),
+    repository.close(),
+    analysisRepository.close()
+  ]);
   process.exitCode = 0;
 }
 

@@ -229,6 +229,7 @@ model DocumentVersion {
 model DocumentAnalysis {
   id               String            @id @default(uuid()) @db.Uuid
   documentId       String            @db.Uuid
+  sourceSha256     String
   model            String
   schemaVersion    String
   executiveSummary String?
@@ -239,6 +240,7 @@ model DocumentAnalysis {
   findings         AnalysisFinding[]
 
   @@index([documentId, createdAt])
+  @@unique([documentId, sourceSha256, schemaVersion, model], map: "DocumentAnalysis_source_key")
 }
 
 model AnalysisFinding {

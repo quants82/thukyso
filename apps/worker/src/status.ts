@@ -1,7 +1,7 @@
 export function workerStatus(queueConnected: boolean) {
   return {
     status: queueConnected ? "ready" : "starting",
-    phase: 4,
+    phase: 5,
     queueConnected
   } as const;
 }

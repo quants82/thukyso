@@ -30,7 +30,16 @@ const workerEnvironmentSchema = infrastructureEnvironmentSchema.extend({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   WORKER_SCAN_INTERVAL_MS: z.coerce.number().int().min(30_000).max(300_000).default(60_000),
-  MAX_DOCUMENT_SIZE_MB: z.coerce.number().int().min(1).max(100).default(25)
+  MAX_DOCUMENT_SIZE_MB: z.coerce.number().int().min(1).max(50).default(25),
+  MAX_EXTRACTED_TEXT_CHARS: z.coerce
+    .number()
+    .int()
+    .min(10_000)
+    .max(2_000_000)
+    .default(500_000),
+  WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(10).default(2),
+  GEMINI_API_KEY: z.string().min(1),
+  GEMINI_MODEL: z.string().regex(/^gemini-[a-zA-Z0-9._-]+$/).default("gemini-2.5-flash")
 });
 
 export type InfrastructureEnvironment = z.infer<typeof infrastructureEnvironmentSchema>;

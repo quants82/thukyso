@@ -1,1 +1,17 @@
-{"name":"@thukyso/gemini","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts","scripts":{"build":"tsc -p tsconfig.build.json","lint":"eslint src","typecheck":"tsc -p tsconfig.json --noEmit --pretty false","test":"node -e \"console.log('No tests yet')\""}}
+{
+  "name": "@thukyso/gemini",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@google/genai": "^2.13.0",
+    "zod": "^4.4.3"
+  }
+}

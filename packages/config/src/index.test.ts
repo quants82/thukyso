@@ -61,15 +61,22 @@ describe("loadEnvironment", () => {
             "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
           GOOGLE_CLIENT_ID: "client-id",
           GOOGLE_CLIENT_SECRET: "client-secret",
+          GEMINI_API_KEY: "gemini-api-key",
+          GEMINI_MODEL: "gemini-2.5-flash",
           WORKER_SCAN_INTERVAL_MS: "60000",
-          MAX_DOCUMENT_SIZE_MB: "25"
+          MAX_DOCUMENT_SIZE_MB: "25",
+          WORKER_CONCURRENCY: "2",
+          MAX_EXTRACTED_TEXT_CHARS: "500000"
         },
         { loadFile: false }
       )
     ).toMatchObject({
       GOOGLE_CLIENT_ID: "client-id",
+      GEMINI_MODEL: "gemini-2.5-flash",
       WORKER_SCAN_INTERVAL_MS: 60000,
-      MAX_DOCUMENT_SIZE_MB: 25
+      MAX_DOCUMENT_SIZE_MB: 25,
+      WORKER_CONCURRENCY: 2,
+      MAX_EXTRACTED_TEXT_CHARS: 500000
     });
   });
 });

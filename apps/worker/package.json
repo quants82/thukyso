@@ -14,9 +14,11 @@
   "dependencies": {
     "@prisma/client": "^6.13.0",
     "@thukyso/config": "workspace:*",
+    "@thukyso/gemini": "workspace:*",
     "bullmq": "^5.56.9",
     "google-auth-library": "^10.3.0",
-    "ioredis": "^5.7.0"
+    "ioredis": "^5.7.0",
+    "mammoth": "^1.12.0"
   },
   "devDependencies": {
     "tsx": "^4.20.3"

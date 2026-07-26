@@ -100,3 +100,23 @@ Browser
 - Chỉ chấp nhận PDF/DOCX trong giới hạn dung lượng; SHA-256 được tính trong bộ nhớ.
 - File hợp lệ chuyển sang `01_DANG_XU_LY`; file sai định dạng/quá lớn chuyển `99_LOI_XU_LY`.
 - Phase 4 tạo job `analyze-document` nhưng không tiêu thụ hoặc gọi Gemini.
+
+## Gemini Pipeline Phase 5
+
+```text
+BullMQ analyze-document
+  -> claim Job + Document (idempotent)
+  -> tải file bằng OAuth drive.file
+  -> xác minh SHA-256
+  -> PDF inline / DOCX raw text trong bộ nhớ
+  -> 5 Gemini Interactions tuần tự với structured output
+  -> Zod validation
+  -> transaction DocumentAnalysis + AnalysisFinding + Job + AuditLog
+```
+
+- API key chỉ nằm trong cấu hình worker phía server.
+- Interactions đặt `store: false`; không dùng tool, URL context hoặc Google Search.
+- Prompt coi nội dung tài liệu là dữ liệu không tin cậy và bỏ qua chỉ dẫn nằm trong file.
+- Không ghi PDF/DOCX tạm xuống đĩa; buffer được giải phóng sau job.
+- Một kết quả phân tích duy nhất theo `(documentId, sourceSha256, schemaVersion, model)`.
+- Phase 5 chỉ phân tích văn bản. So sánh tài liệu thuộc Phase 7, sinh báo cáo thuộc Phase 8.

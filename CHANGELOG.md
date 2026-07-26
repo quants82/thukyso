@@ -26,6 +26,11 @@
 - Thêm kiểm tra PDF/DOCX, giới hạn dung lượng, SHA-256 và phân luồng file lỗi.
 - Thêm luồng chọn file qua Google Picker để giữ quyền Drive ở `drive.file`.
 - Chuyển scanner sang OAuth `drive.file` của người dùng; token chỉ giải mã trong worker.
+- Thêm Gemini Interactions API với năm lượt structured analysis độc lập cho PDF/DOCX.
+- Thêm schema validation, prompt-injection guard, lưu Analysis/Finding idempotent và audit
+  retry/failure/completion.
+- Thêm migration `20260727062000_phase_5_gemini_analysis` và worker consumer cho
+  `analyze-document`.
 
 ### Changed
 

@@ -41,6 +41,11 @@ export class DriveClient {
   }
 
   async sha256(fileId: string, maxBytes: number, refreshToken: string) {
+    const bytes = await this.download(fileId, maxBytes, refreshToken);
+    return createHash("sha256").update(bytes).digest("hex");
+  }
+
+  async download(fileId: string, maxBytes: number, refreshToken: string) {
     const response = await this.fetch(
       refreshToken,
       `/files/${encodeURIComponent(fileId)}?alt=media`
@@ -49,7 +54,7 @@ export class DriveClient {
     if (declaredSize > maxBytes) throw new Error("FILE_TOO_LARGE");
     const bytes = new Uint8Array(await response.arrayBuffer());
     if (bytes.byteLength > maxBytes) throw new Error("FILE_TOO_LARGE");
-    return createHash("sha256").update(bytes).digest("hex");
+    return bytes;
   }
 
   async moveFile(
