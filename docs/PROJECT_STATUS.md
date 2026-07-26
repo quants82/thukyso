@@ -94,7 +94,8 @@ Production Phase 1 hiện đang hoạt động:
 
 ## 4. Đang làm
 
-Phase 2 và Phase 3 đã hoàn tất trên production. Chưa bắt đầu Phase 4.
+Phase 2 và Phase 3 đã hoàn tất trên production. Mã nguồn Phase 4 đang được kiểm thử trước
+khi triển khai worker production.
 
 Frontend hiện vẫn là trang giới thiệu nền tảng; giao diện trạng thái đăng nhập sẽ được bổ sung trong phase giao diện. Việc trang chủ còn hiển thị nội dung Phase 0 không ảnh hưởng API OAuth đã hoạt động.
 
@@ -109,8 +110,13 @@ Kết quả production Phase 3:
 5. `THU_KY_SO` và đủ 9 thư mục chuẩn đã được tạo.
 6. Database có một kết nối active, 9 DriveFolder và audit `DRIVE_CONNECTED`.
 
-Bước tiếp theo là thiết kế và triển khai riêng Phase 4: worker polling idempotent. Không đưa
-Gemini hoặc phân tích tài liệu vào Phase 4.
+Bước tiếp theo:
+
+1. Triển khai worker Phase 4 lên production.
+2. Tải một PDF thử nghiệm vào `00_VAN_BAN_MOI`.
+3. Xác nhận file chuyển `01_DANG_XU_LY`, database có đúng một Document/Version/Job.
+4. Restart worker và xác nhận không tạo bản ghi trùng.
+5. Chỉ sau đó đánh dấu Phase 4 hoàn thành; chưa bắt đầu Gemini Phase 5.
 
 ## 6. Các phase sau
 

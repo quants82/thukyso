@@ -22,6 +22,8 @@
 - Thêm OAuth tăng dần `drive.file`, Google Picker và API quản lý kết nối Drive.
 - Thêm chia sẻ Service Account, cấu trúc 9 thư mục chuẩn và audit log kết nối Drive.
 - Thêm giao diện đăng nhập, chọn, đổi và ngắt thư mục Google Drive.
+- Thêm Drive worker polling, Redis lock và chuỗi khóa idempotent từ Drive tới BullMQ.
+- Thêm kiểm tra PDF/DOCX, giới hạn dung lượng, SHA-256 và phân luồng file lỗi.
 
 ### Changed
 

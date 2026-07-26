@@ -10,6 +10,8 @@ Trợ lý xử lý văn bản và điều hành AI. Sản phẩm không phải d
 - [Hướng dẫn vận hành](docs/OPERATIONS.md)
 - [Lưu ý quan trọng](docs/IMPORTANT_NOTES.md)
 - [Google OAuth](docs/GOOGLE_OAUTH.md)
+- [Google Drive](docs/GOOGLE_DRIVE.md)
+- [Drive Worker](docs/DRIVE_WORKER.md)
 - [Bảo mật](docs/SECURITY.md)
 - [Triển khai](docs/DEPLOYMENT.md)
 

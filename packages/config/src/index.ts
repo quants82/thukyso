@@ -25,8 +25,15 @@ const apiEnvironmentSchema = infrastructureEnvironmentSchema.extend({
   SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7)
 });
 
+const workerEnvironmentSchema = infrastructureEnvironmentSchema.extend({
+  GOOGLE_SERVICE_ACCOUNT_KEY_FILE: z.string().min(1),
+  WORKER_SCAN_INTERVAL_MS: z.coerce.number().int().min(30_000).max(300_000).default(60_000),
+  MAX_DOCUMENT_SIZE_MB: z.coerce.number().int().min(1).max(100).default(25)
+});
+
 export type InfrastructureEnvironment = z.infer<typeof infrastructureEnvironmentSchema>;
 export type ApiEnvironment = z.infer<typeof apiEnvironmentSchema>;
+export type WorkerEnvironment = z.infer<typeof workerEnvironmentSchema>;
 
 export function loadEnvironment(
   source: NodeJS.ProcessEnv = process.env,
@@ -40,6 +47,13 @@ export function loadApiEnvironment(
   options: { loadFile?: boolean } = {}
 ): ApiEnvironment {
   return parseEnvironment(apiEnvironmentSchema, source, options);
+}
+
+export function loadWorkerEnvironment(
+  source: NodeJS.ProcessEnv = process.env,
+  options: { loadFile?: boolean } = {}
+): WorkerEnvironment {
+  return parseEnvironment(workerEnvironmentSchema, source, options);
 }
 
 function parseEnvironment<T extends z.ZodType>(

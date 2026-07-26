@@ -88,3 +88,11 @@ Browser
 - Backend tạo idempotent `THU_KY_SO` và 9 thư mục con chuẩn.
 - Đổi/ngắt kết nối gỡ quyền Service Account ở thư mục cũ nhưng không di chuyển hoặc xóa file.
 - Worker polling chưa được triển khai trong Phase 3.
+
+## Drive Worker Phase 4
+
+- Polling mỗi 60 giây bằng Service Account và scope `drive.file`.
+- Redis lock theo DriveConnection; database và BullMQ dùng khóa xác định chống trùng.
+- Chỉ chấp nhận PDF/DOCX trong giới hạn dung lượng; SHA-256 được tính trong bộ nhớ.
+- File hợp lệ chuyển sang `01_DANG_XU_LY`; file sai định dạng/quá lớn chuyển `99_LOI_XU_LY`.
+- Phase 4 tạo job `analyze-document` nhưng không tiêu thụ hoặc gọi Gemini.

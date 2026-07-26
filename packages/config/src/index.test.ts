@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { loadApiEnvironment, loadEnvironment, redisConnectionOptions } from "./index.js";
+import {
+  loadApiEnvironment,
+  loadEnvironment,
+  loadWorkerEnvironment,
+  redisConnectionOptions
+} from "./index.js";
 
 describe("loadEnvironment", () => {
   it("parses required infrastructure settings", () => {
@@ -43,6 +48,26 @@ describe("loadEnvironment", () => {
         { loadFile: false }
       )
     ).toThrow("COOKIE_SECRET");
+  });
+
+  it("validates isolated Drive worker settings", () => {
+    expect(
+      loadWorkerEnvironment(
+        {
+          NODE_ENV: "test",
+          DATABASE_URL: "postgresql://user:pass@localhost:5432/app",
+          REDIS_URL: "redis://localhost:6379/2",
+          GOOGLE_SERVICE_ACCOUNT_KEY_FILE: "/secure/service-account.json",
+          WORKER_SCAN_INTERVAL_MS: "60000",
+          MAX_DOCUMENT_SIZE_MB: "25"
+        },
+        { loadFile: false }
+      )
+    ).toMatchObject({
+      GOOGLE_SERVICE_ACCOUNT_KEY_FILE: "/secure/service-account.json",
+      WORKER_SCAN_INTERVAL_MS: 60000,
+      MAX_DOCUMENT_SIZE_MB: 25
+    });
   });
 });
 

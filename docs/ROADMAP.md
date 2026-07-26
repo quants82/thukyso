@@ -6,7 +6,7 @@
 | 1 | NestJS, Prisma, health dependencies, logging, BullMQ | Hoàn thành |
 | 2 | Google OAuth server-side | Hoàn thành |
 | 3 | Kết nối thư mục Google Drive với `drive.file` | Hoàn thành |
-| 4 | Worker quét Drive idempotent | Chưa bắt đầu |
+| 4 | Worker quét Drive idempotent | Đang triển khai production |
 | 5 | Pipeline phân tích Gemini | Chưa bắt đầu |
 | 6 | Giao diện quản lý văn bản | Chưa bắt đầu |
 | 7 | So sánh văn bản | Chưa bắt đầu |
@@ -59,3 +59,15 @@ Phase 2 không xin scope Drive và không gửi Google token xuống frontend.
 
 Migration, cấu hình production, Google Picker thật, 9 thư mục chuẩn, database và audit log
 đã được kiểm thử thành công. Worker polling vẫn thuộc Phase 4.
+
+## Kết quả mã nguồn Phase 4
+
+- Polling Drive mỗi 60 giây bằng Service Account.
+- Redis lock, unique keys database và BullMQ job ID xác định bảo đảm idempotency.
+- Chỉ nhận PDF/DOCX, giới hạn dung lượng và tính SHA-256 trong bộ nhớ.
+- Transaction tạo Document, DocumentVersion, Job và audit log.
+- Di chuyển file hợp lệ sang xử lý, file bị từ chối sang thư mục lỗi.
+- Graceful shutdown đóng Queue, Redis và Prisma.
+
+Chỉ đánh dấu hoàn thành sau khi production phát hiện một PDF thật, tạo đúng một Document/Job
+và restart worker không tạo bản ghi trùng. Gemini vẫn thuộc Phase 5.

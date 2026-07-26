@@ -12,8 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@prisma/client": "^6.13.0",
     "@thukyso/config": "workspace:*",
     "bullmq": "^5.56.9",
+    "google-auth-library": "^10.3.0",
     "ioredis": "^5.7.0"
   },
   "devDependencies": {
