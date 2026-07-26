@@ -28,3 +28,4 @@
 - Ràng buộc stack production không được ảnh hưởng backend dùng chung và `ominilab.vatli365.vn`.
 - Chỉ bind PostgreSQL và Redis local qua `127.0.0.1` trong Docker Compose phát triển.
 - Triển khai Google OAuth Phase 2 trên `thukyso.vatli365.vn` và xác nhận đăng nhập, session, OAuth account cùng audit log trên production.
+- Triển khai Phase 3 trên production và xác nhận Picker, kết nối Drive, 9 thư mục chuẩn cùng audit log.

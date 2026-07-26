@@ -5,7 +5,7 @@
 | 0 | Monorepo, tài liệu, placeholder, Docker local, CI | Hoàn thành |
 | 1 | NestJS, Prisma, health dependencies, logging, BullMQ | Hoàn thành |
 | 2 | Google OAuth server-side | Hoàn thành |
-| 3 | Kết nối thư mục Google Drive với `drive.file` | Đang triển khai production |
+| 3 | Kết nối thư mục Google Drive với `drive.file` | Hoàn thành |
 | 4 | Worker quét Drive idempotent | Chưa bắt đầu |
 | 5 | Pipeline phân tích Gemini | Chưa bắt đầu |
 | 6 | Giao diện quản lý văn bản | Chưa bắt đầu |
@@ -57,5 +57,5 @@ Phase 2 không xin scope Drive và không gửi Google token xuống frontend.
 - Lưu `DriveConnection`, `DriveFolder`; đổi/ngắt kết nối và audit log.
 - Giao diện đăng nhập, kết nối, đổi và ngắt Drive.
 
-Chỉ đánh dấu Phase 3 hoàn thành sau khi migration, cấu hình production và Google Picker thật
-được kiểm thử thành công. Worker polling vẫn thuộc Phase 4.
+Migration, cấu hình production, Google Picker thật, 9 thư mục chuẩn, database và audit log
+đã được kiểm thử thành công. Worker polling vẫn thuộc Phase 4.

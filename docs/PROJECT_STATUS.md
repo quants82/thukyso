@@ -94,19 +94,23 @@ Production Phase 1 hiện đang hoạt động:
 
 ## 4. Đang làm
 
-Phase 2 đã hoàn tất trên production. Mã nguồn Phase 3 đang được kiểm thử trước khi triển khai.
+Phase 2 và Phase 3 đã hoàn tất trên production. Chưa bắt đầu Phase 4.
 
 Frontend hiện vẫn là trang giới thiệu nền tảng; giao diện trạng thái đăng nhập sẽ được bổ sung trong phase giao diện. Việc trang chủ còn hiển thị nội dung Phase 0 không ảnh hưởng API OAuth đã hoạt động.
 
 ## 5. Bước tiếp theo
 
-Hoàn tất triển khai production Phase 3 theo đúng phạm vi `docs/ROADMAP.md`:
+Kết quả production Phase 3:
 
-1. Thêm Drive callback URI vào OAuth Client production.
-2. Lưu API key Picker và cấu hình Service Account vào `.env` production.
-3. Pull mã, áp dụng migration Phase 3, build và restart riêng dịch vụ Thư Ký Số.
-4. Kiểm thử OAuth tăng quyền, Picker, cấu trúc 9 folder, đổi folder và ngắt kết nối.
-5. Kiểm tra audit log và xác nhận không xin scope Drive toàn phần.
+1. Drive API, Picker API và duy nhất scope `drive.file` đã cấu hình.
+2. Service Account không có IAM role cấp project; khóa JSON nằm ngoài repository với quyền `600`.
+3. Migration Phase 3 đã áp dụng; API và frontend production đã build.
+4. Google Picker thật đã chọn `THU_KY_SO_WORKSPACE`.
+5. `THU_KY_SO` và đủ 9 thư mục chuẩn đã được tạo.
+6. Database có một kết nối active, 9 DriveFolder và audit `DRIVE_CONNECTED`.
+
+Bước tiếp theo là thiết kế và triển khai riêng Phase 4: worker polling idempotent. Không đưa
+Gemini hoặc phân tích tài liệu vào Phase 4.
 
 ## 6. Các phase sau
 

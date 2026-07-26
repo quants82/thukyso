@@ -55,3 +55,10 @@ Ngắt kết nối gỡ quyền Service Account và không xóa hay di chuyển 
 - Không gửi API key, OAuth client secret, refresh token hoặc khóa Service Account qua chat.
 
 Phase 3 không triển khai worker quét file; nội dung đó thuộc Phase 4.
+
+## Xác nhận production
+
+- OAuth tăng quyền và Google Picker hoạt động tại `thukyso.vatli365.vn`.
+- Người dùng đã chọn `THU_KY_SO_WORKSPACE`.
+- `THU_KY_SO` và đủ 9 thư mục con được tạo.
+- PostgreSQL ghi một kết nối active, 9 folder và audit `DRIVE_CONNECTED`.
