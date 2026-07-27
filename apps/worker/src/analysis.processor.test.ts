@@ -68,7 +68,7 @@ describe("AnalysisProcessor", () => {
       drive as never,
       repository as never,
       gemini as never,
-      "gemini-2.5-flash",
+      "gemini-3.5-flash",
       1024,
       10_000
     );
@@ -89,7 +89,7 @@ describe("AnalysisProcessor", () => {
     expect(gemini.analyze).toHaveBeenCalledTimes(5);
     expect(repository.complete).toHaveBeenCalledWith(
       source,
-      "gemini-2.5-flash",
+      "gemini-3.5-flash",
       expect.objectContaining({ executiveSummary: "Tóm tắt" })
     );
     expect(repository.fail).not.toHaveBeenCalled();
@@ -107,7 +107,7 @@ describe("AnalysisProcessor", () => {
       { download: vi.fn() } as never,
       repository as never,
       gemini as never,
-      "gemini-2.5-flash",
+      "gemini-3.5-flash",
       1024,
       10_000
     );
@@ -134,7 +134,7 @@ describe("AnalysisProcessor", () => {
       { download: vi.fn().mockResolvedValue(new TextEncoder().encode("changed")) } as never,
       repository as never,
       { analyze: vi.fn() } as never,
-      "gemini-2.5-flash",
+      "gemini-3.5-flash",
       1024,
       10_000
     );

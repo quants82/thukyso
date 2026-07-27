@@ -36,6 +36,10 @@
 
 ### Changed
 
+- Đổi model Gemini mặc định sang `gemini-3.5-flash` vì `gemini-2.5-flash` không còn được
+  cấp cho tài khoản mới trên Interactions API.
+- Hoàn tất Phase 5 trên production: PDF thật tạo một Analysis, 10 Findings, trạng thái
+  `REVIEW_REQUIRED`/`COMPLETED`, audit hoàn tất và không trùng dữ liệu sau restart worker.
 - Ràng buộc stack production không được ảnh hưởng backend dùng chung và `ominilab.vatli365.vn`.
 - Chỉ bind PostgreSQL và Redis local qua `127.0.0.1` trong Docker Compose phát triển.
 - Triển khai Google OAuth Phase 2 trên `thukyso.vatli365.vn` và xác nhận đăng nhập, session, OAuth account cùng audit log trên production.

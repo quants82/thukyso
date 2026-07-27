@@ -10,7 +10,7 @@ Cập nhật: 27/07/2026
 - Website tạm: `https://thukyso.vatli365.vn`
 - Repository: `https://github.com/quants82/thukyso`
 - Nhánh triển khai: `main`
-- Phase hiện tại: Phase 5 đã hoàn thành mã nguồn, chờ kiểm thử production
+- Phase hiện tại: Phase 5 đã hoàn thành trên production; chuẩn bị Phase 6
 
 Sản phẩm không phải dịch vụ chữ ký điện tử.
 
@@ -107,30 +107,35 @@ Production Phase 1 hiện đang hoạt động:
 - PDF thử nghiệm đã chuyển từ `00_VAN_BAN_MOI` sang `01_DANG_XU_LY`.
 - Production có đúng một Document, DocumentVersion, Job và audit `DOCUMENT_DISCOVERED`.
 - Restart worker không tạo thêm bản ghi.
-- Job `analyze-document` ở trạng thái `PENDING`, chờ pipeline Phase 5.
+- Job `analyze-document` đã được pipeline Phase 5 xử lý thành công.
+
+### Phase 5 — Gemini analysis
+
+- Migration `20260727062000_phase_5_gemini_analysis` đã áp dụng trên production.
+- Worker Phase 5 chạy với `gemini-3.5-flash`, concurrency 2.
+- Gemini Interactions API thực hiện năm lượt structured analysis với `store: false`.
+- PDF thật tạo đúng một `DocumentAnalysis` và 10 `AnalysisFinding`.
+- Document chuyển sang `REVIEW_REQUIRED`; Job chuyển sang `COMPLETED` sau một lần chạy.
+- Audit `DOCUMENT_ANALYSIS_COMPLETED` đã được tạo.
+- Restart worker không tạo analysis, finding, job hoặc audit trùng.
+- API key chỉ nằm trong `.env` quyền `600`, không nằm trong source control hay log.
 
 ## 4. Đang làm
 
-Phase 4 đã hoàn thành. Mã nguồn Phase 5 đã hoàn tất với Gemini Interactions API, structured
-output, năm lượt phân tích, retry/idempotency và audit log. Chưa cấu hình API key hoặc gọi
-Gemini trên production.
+Phase 5 đã hoàn thành và được kiểm chứng trên production. Chuẩn bị triển khai Phase 6:
+giao diện quản lý, xem danh sách, chi tiết và kết quả phân tích văn bản.
 
 ## 5. Bước tiếp theo
 
-Triển khai Phase 5 lên production:
-
-1. Cấu hình `GEMINI_API_KEY` trong `.env` quyền `600`.
-2. Pull mã nguồn, cài dependency, generate Prisma và áp dụng migration Phase 5.
-3. Build worker và chạy smoke test cấu hình trước khi restart service.
-4. Cho job PDF đang `PENDING` chạy qua Gemini.
-5. Xác nhận Analysis/Findings, trạng thái `REVIEW_REQUIRED`/`COMPLETED`, audit log và
-   idempotency sau restart.
+Triển khai Phase 6 theo phạm vi trong roadmap, bắt đầu từ API chỉ đọc phục vụ danh sách và
+chi tiết văn bản, sau đó xây giao diện review kết quả AI. Không thay đổi pipeline Phase 5
+đã được xác nhận.
 
 ## 6. Các phase sau
 
 - Phase 3: hoàn thành kết nối Google Drive với `drive.file` và Google Picker.
 - Phase 4: hoàn thành worker quét thư mục Drive idempotent.
-- Phase 5: mã nguồn Gemini phân tích PDF/DOCX hoàn tất, chờ production.
+- Phase 5: hoàn thành pipeline Gemini và kiểm chứng bằng PDF thật trên production.
 - Phase 6: giao diện quản lý văn bản.
 - Phase 7: so sánh văn bản.
 - Phase 8: sinh Google Docs/Sheets và biểu mẫu.

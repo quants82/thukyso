@@ -62,7 +62,7 @@ describe("loadEnvironment", () => {
           GOOGLE_CLIENT_ID: "client-id",
           GOOGLE_CLIENT_SECRET: "client-secret",
           GEMINI_API_KEY: "gemini-api-key",
-          GEMINI_MODEL: "gemini-2.5-flash",
+          GEMINI_MODEL: "gemini-3.5-flash",
           WORKER_SCAN_INTERVAL_MS: "60000",
           MAX_DOCUMENT_SIZE_MB: "25",
           WORKER_CONCURRENCY: "2",
@@ -72,7 +72,7 @@ describe("loadEnvironment", () => {
       )
     ).toMatchObject({
       GOOGLE_CLIENT_ID: "client-id",
-      GEMINI_MODEL: "gemini-2.5-flash",
+      GEMINI_MODEL: "gemini-3.5-flash",
       WORKER_SCAN_INTERVAL_MS: 60000,
       MAX_DOCUMENT_SIZE_MB: 25,
       WORKER_CONCURRENCY: 2,

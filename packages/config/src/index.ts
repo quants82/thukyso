@@ -39,7 +39,7 @@ const workerEnvironmentSchema = infrastructureEnvironmentSchema.extend({
     .default(500_000),
   WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(10).default(2),
   GEMINI_API_KEY: z.string().min(1),
-  GEMINI_MODEL: z.string().regex(/^gemini-[a-zA-Z0-9._-]+$/).default("gemini-2.5-flash")
+  GEMINI_MODEL: z.string().regex(/^gemini-[a-zA-Z0-9._-]+$/).default("gemini-3.5-flash")
 });
 
 export type InfrastructureEnvironment = z.infer<typeof infrastructureEnvironmentSchema>;

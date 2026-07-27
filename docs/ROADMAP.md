@@ -7,7 +7,7 @@
 | 2 | Google OAuth server-side | Hoàn thành |
 | 3 | Kết nối thư mục Google Drive với `drive.file` | Hoàn thành |
 | 4 | Worker quét Drive idempotent | Hoàn thành |
-| 5 | Pipeline phân tích Gemini | Mã nguồn hoàn thành; chờ production |
+| 5 | Pipeline phân tích Gemini | Hoàn thành |
 | 6 | Giao diện quản lý văn bản | Chưa bắt đầu |
 | 7 | So sánh văn bản | Chưa bắt đầu |
 | 8 | Sinh báo cáo và biểu mẫu | Chưa bắt đầu |
@@ -72,7 +72,7 @@ Migration, cấu hình production, Google Picker thật, 9 thư mục chuẩn, d
 
 Production đã phát hiện một PDF thật, chuyển file từ `00_VAN_BAN_MOI` sang
 `01_DANG_XU_LY`, tạo đúng một Document/DocumentVersion/Job/audit log và không tạo bản ghi
-trùng sau khi restart worker. Job `analyze-document` đang chờ Phase 5; Gemini chưa được gọi.
+trùng sau khi restart worker. Job này đã được Phase 5 xử lý thành công.
 
 ## Kết quả mã nguồn Phase 5
 
@@ -88,6 +88,7 @@ trùng sau khi restart worker. Job `analyze-document` đang chờ Phase 5; Gemin
 - Job retry theo BullMQ, cập nhật trạng thái Document/Job và tạo audit log cho retry, lỗi,
   hoàn tất.
 
-Chỉ đánh dấu hoàn thành sau khi migration production được áp dụng, Gemini xử lý PDF thật,
-database có DocumentAnalysis/AnalysisFinding hợp lệ và restart worker không phân tích trùng.
-Phase 6 chưa bắt đầu.
+Migration production đã được áp dụng. Gemini `gemini-3.5-flash` đã xử lý PDF thật thành
+công, tạo một DocumentAnalysis, 10 AnalysisFinding, chuyển Document sang `REVIEW_REQUIRED`,
+Job sang `COMPLETED` và tạo audit `DOCUMENT_ANALYSIS_COMPLETED`. Restart worker không gọi
+Gemini hoặc tạo dữ liệu/audit trùng. Phase 6 chưa bắt đầu.

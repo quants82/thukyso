@@ -47,13 +47,14 @@ Google Drive và chỉ được tải vào bộ nhớ bằng OAuth người dùn
 
 ```env
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.5-flash
 WORKER_CONCURRENCY=2
 MAX_EXTRACTED_TEXT_CHARS=500000
 ```
 
-`gemini-2.5-flash` là model ổn định mặc định. Việc đổi model phải thực hiện qua biến môi
-trường và tạo một khóa kết quả idempotent mới theo tên model.
+`gemini-3.5-flash` là model GA mặc định. `gemini-2.5-flash` trả 404 cho tài khoản mới trên
+Interactions API tại thời điểm triển khai production. Việc đổi model phải thực hiện qua
+biến môi trường và tạo một khóa kết quả idempotent mới theo tên model.
 
 ## Điều kiện xác nhận production
 
@@ -62,3 +63,12 @@ trường và tạo một khóa kết quả idempotent mới theo tên model.
 3. PDF thật tạo đúng một `DocumentAnalysis` và các `AnalysisFinding` có nguồn.
 4. Document chuyển `REVIEW_REQUIRED`; Job chuyển `COMPLETED`.
 5. Restart worker không gọi Gemini hoặc tạo analysis/audit hoàn tất trùng.
+
+## Xác nhận production ngày 27/07/2026
+
+- Worker khởi động ở Phase 5 với model `gemini-3.5-flash`.
+- PDF thật hoàn tất sau một attempt.
+- Database: một `DocumentAnalysis`, 10 `AnalysisFinding`.
+- Trạng thái: Document `REVIEW_REQUIRED`, Job `COMPLETED`.
+- Audit: một `DOCUMENT_ANALYSIS_COMPLETED`.
+- Restart worker giữ nguyên toàn bộ số lượng trên.
