@@ -31,6 +31,8 @@
   retry/failure/completion.
 - Thêm migration `20260727062000_phase_5_gemini_analysis` và worker consumer cho
   `analyze-document`.
+- Định tuyến runtime package Gemini sang JavaScript đã build trong `dist`, trong khi
+  TypeScript vẫn đọc type từ `src`.
 
 ### Changed
 
