@@ -63,6 +63,12 @@ interface Finding {
   quote?: string | null;
   confidence?: number | null;
   reviewStatus: ReviewStatus;
+  reviewReason?:
+    | "AI_MARKED_FOR_REVIEW"
+    | "LOW_CONFIDENCE"
+    | "MISSING_EVIDENCE"
+    | null;
+  needsReview: boolean;
   reviewedTitle?: string | null;
   reviewedDetail?: string | null;
   reviewNote?: string | null;
@@ -482,7 +488,11 @@ function DocumentDashboard(props: {
                 <span className={`status-pill status-${document.status.toLowerCase()}`}>
                   {statusLabels[document.status] ?? document.status}
                 </span>
-                <span className="finding-count">{document.analysis?.findingCount ?? 0} điểm</span>
+                <span className="finding-count">
+                  {document.analysis?.findingCount
+                    ? `${document.analysis.findingCount} cần xem`
+                    : "Không có ngoại lệ"}
+                </span>
                 <span className="chevron">›</span>
               </button>
             ))}
@@ -515,7 +525,12 @@ function DocumentDetailView(props: {
   onApprove: () => Promise<void>;
 }) {
   const analysis = props.document.analysis;
-  const pendingCount = analysis?.findings.filter((finding) => finding.reviewStatus === "PENDING").length ?? 0;
+  const exceptionFindings =
+    analysis?.findings.filter((finding) => finding.reviewReason !== null) ?? [];
+  const reliableFindings =
+    analysis?.findings.filter((finding) => finding.reviewReason === null) ?? [];
+  const pendingCount =
+    exceptionFindings.filter((finding) => finding.needsReview).length;
   const result = analysis?.result;
   return (
     <>
@@ -544,20 +559,44 @@ function DocumentDetailView(props: {
           </section>
           <MetadataGrid result={result} />
           <StructuredSections result={result} />
+          <ExtractedDetails result={result} findings={reliableFindings} />
           <section className="review-section">
             <div className="section-heading">
-              <div><span className="section-kicker">KIỂM TRA CỦA CON NGƯỜI</span><h3>{analysis.findings.length} điểm AI đề xuất</h3></div>
-              <span className="pending-count">{pendingCount} chưa xử lý</span>
+              <div>
+                <span className="section-kicker">CHỈ HIỆN NGOẠI LỆ</span>
+                <h3>{exceptionFindings.length} điểm cần chú ý</h3>
+              </div>
+              {pendingCount > 0 && (
+                <span className="pending-count">{pendingCount} cần bạn kiểm tra</span>
+              )}
             </div>
-            <div className="findings">
-              {analysis.findings.map((finding) => (
-                <FindingCard key={finding.id} finding={finding} busy={props.busy} onReview={props.onReview} />
-              ))}
-            </div>
+            {exceptionFindings.length ? (
+              <div className="findings">
+                {exceptionFindings.map((finding) => (
+                  <FindingCard
+                    key={finding.id}
+                    finding={finding}
+                    busy={props.busy}
+                    onReview={props.onReview}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="review-clear">
+                AI không phát hiện đoạn nào mơ hồ hoặc thiếu nguồn cần bạn xác nhận.
+              </div>
+            )}
             <div className="approval-bar">
-              <div><strong>Phê duyệt văn bản</strong><span>Chỉ khả dụng khi mọi điểm AI đã được kiểm tra.</span></div>
+              <div>
+                <strong>Hoàn tất xem văn bản</strong>
+                <span>
+                  {pendingCount > 0
+                    ? "Chỉ cần xử lý các ngoại lệ ở trên."
+                    : "Không còn ngoại lệ chưa xử lý; không cần xác nhận từng nội dung AI đã đọc rõ."}
+                </span>
+              </div>
               <button disabled={props.busy || pendingCount > 0 || props.document.status === "APPROVED"} onClick={() => void props.onApprove()}>
-                {props.document.status === "APPROVED" ? "Đã phê duyệt" : "Xác nhận hoàn tất"}
+                {props.document.status === "APPROVED" ? "Đã hoàn tất" : "Đã xem và hoàn tất"}
               </button>
             </div>
           </section>
@@ -602,17 +641,6 @@ function StructuredSections({ result }: { result?: AnalysisResult }) {
         evidence: deadline.evidence
       })) ?? []
     },
-    {
-      title: "Điểm chính",
-      items: result?.keyPoints?.map((point) => ({ title: point.text, text: "", evidence: point.evidence })) ?? []
-    },
-    {
-      title: "Phụ lục & báo cáo",
-      items: [
-        ...(result?.attachments ?? []).map((item) => ({ title: item.name, text: item.description || "", evidence: item.evidence })),
-        ...(result?.reportRequirements ?? []).map((item) => ({ title: item.name, text: item.description || "", evidence: item.evidence }))
-      ]
-    }
   ], [result]);
   if (!sections.some((section) => section.items.length)) return null;
   return (
@@ -630,6 +658,72 @@ function StructuredSections({ result }: { result?: AnalysisResult }) {
         </div>
       ))}
     </section>
+  );
+}
+
+function ExtractedDetails({
+  result,
+  findings
+}: {
+  result?: AnalysisResult;
+  findings: Finding[];
+}) {
+  const keyPoints = result?.keyPoints ?? [];
+  const attachments = result?.attachments ?? [];
+  const reportRequirements = result?.reportRequirements ?? [];
+  const count =
+    keyPoints.length +
+    attachments.length +
+    reportRequirements.length +
+    findings.length;
+  if (count === 0) return null;
+  return (
+    <details className="extracted-details">
+      <summary>AI đã trích xuất thêm {count} nội dung rõ ràng — mở khi cần đối chiếu</summary>
+      <div className="extracted-content">
+        {keyPoints.length > 0 && (
+          <div>
+            <h4>Điểm chính</h4>
+            {keyPoints.map((point, index) => (
+              <p key={`key-${index}`}>
+                <strong>{point.text}</strong>
+                <EvidenceLine evidence={point.evidence} />
+              </p>
+            ))}
+          </div>
+        )}
+        {(attachments.length > 0 || reportRequirements.length > 0) && (
+          <div>
+            <h4>Phụ lục và yêu cầu báo cáo</h4>
+            {[...attachments, ...reportRequirements].map((item, index) => (
+              <p key={`attachment-${index}`}>
+                <strong>{item.name}</strong>
+                {item.description && <span>{item.description}</span>}
+                <EvidenceLine evidence={item.evidence} />
+              </p>
+            ))}
+          </div>
+        )}
+        {findings.length > 0 && (
+          <div>
+            <h4>Các dữ kiện có nguồn rõ</h4>
+            {findings.map((finding) => (
+              <p key={finding.id}>
+                <strong>{finding.title}</strong>
+                <EvidenceLine
+                  evidence={{
+                    page: finding.page ?? null,
+                    section: finding.section ?? null,
+                    quote: finding.quote ?? null,
+                    confidence: finding.confidence ?? 0
+                  }}
+                />
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -655,7 +749,11 @@ function FindingCard(props: {
     <article className={`finding-card review-${props.finding.reviewStatus.toLowerCase()}`}>
       <div className="finding-topline">
         <span className={`finding-type type-${props.finding.type.toLowerCase()}`}>{findingLabels[props.finding.type] ?? props.finding.type}</span>
-        <span className="review-badge">{reviewLabel(props.finding.reviewStatus)}</span>
+        <span className="review-badge">
+          {props.finding.reviewStatus === "PENDING"
+            ? reviewReasonLabel(props.finding.reviewReason)
+            : reviewLabel(props.finding.reviewStatus)}
+        </span>
       </div>
       {editing ? (
         <div className="edit-form">
@@ -699,4 +797,12 @@ function reviewLabel(status: ReviewStatus) {
     DISMISSED: "Đã loại bỏ",
     EDITED: "Đã chỉnh sửa"
   }[status];
+}
+
+function reviewReasonLabel(reason: Finding["reviewReason"]) {
+  return {
+    AI_MARKED_FOR_REVIEW: "AI báo cần kiểm tra",
+    LOW_CONFIDENCE: "Độ tin cậy thấp",
+    MISSING_EVIDENCE: "Thiếu nguồn đối chiếu"
+  }[reason ?? "AI_MARKED_FOR_REVIEW"];
 }

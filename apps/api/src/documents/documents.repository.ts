@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import type { DocumentStatus, FindingReviewStatus, Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service.js";
 import type { RequestMetadata } from "../auth/auth.types.js";
+import { findingReviewReason } from "./finding-review.policy.js";
 
 interface ListInput {
   userId: string;
@@ -62,7 +63,16 @@ export class DocumentsRepository {
               executiveSummary: true,
               confidence: true,
               createdAt: true,
-              _count: { select: { findings: true } }
+              findings: {
+                select: {
+                  type: true,
+                  confidence: true,
+                  page: true,
+                  section: true,
+                  quote: true,
+                  reviewStatus: true
+                }
+              }
             }
           }
         }
@@ -207,7 +217,16 @@ export class DocumentsRepository {
             take: 1,
             select: {
               id: true,
-              findings: { select: { reviewStatus: true } }
+              findings: {
+                select: {
+                  type: true,
+                  confidence: true,
+                  page: true,
+                  section: true,
+                  quote: true,
+                  reviewStatus: true
+                }
+              }
             }
           }
         }
@@ -218,7 +237,13 @@ export class DocumentsRepository {
       }
       const analysis = document.analyses[0];
       if (!analysis) return { kind: "no-analysis" as const };
-      if (analysis.findings.some((finding) => finding.reviewStatus === "PENDING")) {
+      if (
+        analysis.findings.some(
+          (finding) =>
+            finding.reviewStatus === "PENDING" &&
+            findingReviewReason(finding) !== null
+        )
+      ) {
         return { kind: "pending-findings" as const };
       }
       if (document.status !== "APPROVED") {

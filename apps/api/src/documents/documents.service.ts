@@ -8,6 +8,7 @@ import { DocumentStatus, FindingReviewStatus } from "@prisma/client";
 import type { RequestMetadata } from "../auth/auth.types.js";
 import { DocumentsRepository } from "./documents.repository.js";
 import type { DocumentListQuery, ReviewFindingInput } from "./documents.types.js";
+import { findingReviewReason } from "./finding-review.policy.js";
 
 const documentStatuses = new Set(Object.values(DocumentStatus));
 const reviewStatuses = new Set<FindingReviewStatus>([
@@ -52,8 +53,12 @@ export class DocumentsService {
         analysis: document.analyses[0]
           ? {
               ...document.analyses[0],
-              findingCount: document.analyses[0]._count.findings,
-              _count: undefined
+              findingCount: document.analyses[0].findings.filter(
+                (finding) =>
+                  finding.reviewStatus === "PENDING" &&
+                  findingReviewReason(finding) !== null
+              ).length,
+              findings: undefined
             }
           : null,
         analyses: undefined
@@ -65,10 +70,24 @@ export class DocumentsService {
     this.uuid(documentId);
     const document = await this.repository.detail(userId, documentId);
     if (!document) throw new NotFoundException("Không tìm thấy văn bản");
+    const analysis = document.analyses[0];
     return {
       ...document,
       sizeBytes: document.sizeBytes?.toString() ?? null,
-      analysis: document.analyses[0] ?? null,
+      analysis: analysis
+        ? {
+            ...analysis,
+            findings: analysis.findings.map((finding) => {
+              const reviewReason = findingReviewReason(finding);
+              return {
+                ...finding,
+                reviewReason,
+                needsReview:
+                  finding.reviewStatus === "PENDING" && reviewReason !== null
+              };
+            })
+          }
+        : null,
       analyses: undefined
     };
   }

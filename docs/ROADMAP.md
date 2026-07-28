@@ -100,7 +100,9 @@ Gemini hoặc tạo dữ liệu/audit trùng. Đây là nền dữ liệu đã d
   mới nhất.
 - Review finding giữ nguyên dữ liệu AI, lưu riêng quyết định xác nhận, loại bỏ hoặc nội dung
   đã chỉnh sửa.
-- Chỉ cho phép phê duyệt khi tất cả findings đã được review; thao tác là idempotent.
+- Chỉ findings mơ hồ (AI yêu cầu review, confidence dưới 80% hoặc thiếu toàn bộ nguồn) mới
+  cần người dùng xử lý; dữ liệu rõ được thu gọn và không chặn hoàn tất.
+- Chỉ cho phép phê duyệt khi mọi ngoại lệ đã được review; thao tác là idempotent.
 - Phân quyền mọi API theo organization membership và khóa review sau khi phê duyệt.
 - Dashboard responsive cho desktop/mobile, có trạng thái tải, rỗng, lỗi và Drive controls.
 - Audit `ANALYSIS_FINDING_REVIEWED` và `DOCUMENT_REVIEW_APPROVED`.

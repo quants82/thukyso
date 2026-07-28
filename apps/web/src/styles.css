@@ -91,10 +91,17 @@ small { color: #6b7e8d; }
 .structured-item { padding: 12px 0; border-top: 1px solid #edf1ef; }
 .structured-item p { margin: .3rem 0; color: #516b7d; }
 .evidence { display: block; margin-top: .35rem; color: #8a7141; }
+.extracted-details { margin: 20px 0 30px; border: 1px solid #dce6e2; border-radius: 14px; background: #fff; overflow: hidden; }
+.extracted-details summary { padding: 18px 20px; color: #31576d; background: #f6f9f8; font-weight: 800; cursor: pointer; }
+.extracted-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 20px; border-top: 1px solid #e5ece9; }
+.extracted-content h4 { margin: 0 0 12px; }
+.extracted-content p { display: grid; gap: 4px; margin: 0; padding: 10px 0; border-top: 1px solid #edf1ef; color: #526d7e; }
+.extracted-content p span:not(.evidence) { display: block; }
 .review-section { margin-top: 30px; }
 .review-section h3 { margin: .3rem 0; font-size: 1.5rem; }
 .pending-count { color: #8a5d0c; background: #fff2d5; }
 .findings { display: grid; gap: 14px; margin: 18px 0; }
+.review-clear { margin: 18px 0; padding: 18px 20px; border: 1px solid #b9e4d1; border-radius: 12px; color: #086a4e; background: #ebfaf3; }
 .finding-card { padding: 20px; border: 1px solid #dce6e2; border-left: 5px solid #d7a03a; border-radius: 14px; background: #fff; }
 .finding-card.review-confirmed { border-left-color: #15966a; }
 .finding-card.review-dismissed { border-left-color: #aeb9b4; opacity: .8; }
@@ -136,6 +143,6 @@ small { color: #6b7e8d; }
   .document-row .status-pill { grid-column: 2; justify-self: start; }
   .finding-count { display: none; }
   .chevron { grid-column: 3; grid-row: 1; }
-  .structured-grid, .metadata-grid { grid-template-columns: 1fr; }
+  .structured-grid, .metadata-grid, .extracted-content { grid-template-columns: 1fr; }
   .login-card { padding: 32px 24px; }
 }

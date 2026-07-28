@@ -45,6 +45,9 @@
 
 ### Changed
 
+- Đổi Phase 6 sang review theo ngoại lệ: chỉ finding `REQUIRES_REVIEW`, confidence dưới
+  80% hoặc thiếu toàn bộ nguồn mới cần xác nhận; dữ liệu rõ được thu gọn và không chặn hoàn
+  tất văn bản.
 - Đổi model Gemini mặc định sang `gemini-3.5-flash` vì `gemini-2.5-flash` không còn được
   cấp cho tài khoản mới trên Interactions API.
 - Hoàn tất Phase 5 trên production: PDF thật tạo một Analysis, 10 Findings, trạng thái
