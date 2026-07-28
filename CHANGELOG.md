@@ -33,6 +33,15 @@
   `analyze-document`.
 - Định tuyến runtime package Gemini sang JavaScript đã build trong `dist`, trong khi
   TypeScript vẫn đọc type từ `src`.
+- Thêm API quản lý văn bản Phase 6 với phân trang, tìm kiếm, lọc, chi tiết analysis và phân
+  quyền theo organization.
+- Thêm human review giữ nguyên dữ liệu AI, lưu xác nhận/loại bỏ/chỉnh sửa riêng và khóa
+  phê duyệt khi còn finding chưa xử lý.
+- Thêm audit `ANALYSIS_FINDING_REVIEWED`, `DOCUMENT_REVIEW_APPROVED` và migration
+  `20260728010000_phase_6_document_review`.
+- Thêm dashboard responsive quản lý văn bản, trang chi tiết phân tích và giao diện review.
+- Dùng icon PNG 512×512 do chủ dự án cung cấp làm favicon, Apple touch icon và nhận diện
+  trên giao diện Thư Ký Số.
 
 ### Changed
 

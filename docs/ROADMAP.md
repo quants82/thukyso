@@ -8,7 +8,7 @@
 | 3 | Kết nối thư mục Google Drive với `drive.file` | Hoàn thành |
 | 4 | Worker quét Drive idempotent | Hoàn thành |
 | 5 | Pipeline phân tích Gemini | Hoàn thành |
-| 6 | Giao diện quản lý văn bản | Chưa bắt đầu |
+| 6 | Giao diện quản lý văn bản | Mã nguồn hoàn thành; chờ production |
 | 7 | So sánh văn bản | Chưa bắt đầu |
 | 8 | Sinh báo cáo và biểu mẫu | Chưa bắt đầu |
 | 9 | Giao việc | Chưa bắt đầu |
@@ -91,4 +91,19 @@ trùng sau khi restart worker. Job này đã được Phase 5 xử lý thành c�
 Migration production đã được áp dụng. Gemini `gemini-3.5-flash` đã xử lý PDF thật thành
 công, tạo một DocumentAnalysis, 10 AnalysisFinding, chuyển Document sang `REVIEW_REQUIRED`,
 Job sang `COMPLETED` và tạo audit `DOCUMENT_ANALYSIS_COMPLETED`. Restart worker không gọi
-Gemini hoặc tạo dữ liệu/audit trùng. Phase 6 chưa bắt đầu.
+Gemini hoặc tạo dữ liệu/audit trùng. Đây là nền dữ liệu đã dùng để phát triển Phase 6.
+
+## Kết quả mã nguồn Phase 6
+
+- API danh sách văn bản có phân trang, tìm theo tên và lọc trạng thái.
+- API chi tiết trả metadata, tóm tắt, nhiệm vụ, thời hạn, nguồn dẫn và findings của analysis
+  mới nhất.
+- Review finding giữ nguyên dữ liệu AI, lưu riêng quyết định xác nhận, loại bỏ hoặc nội dung
+  đã chỉnh sửa.
+- Chỉ cho phép phê duyệt khi tất cả findings đã được review; thao tác là idempotent.
+- Phân quyền mọi API theo organization membership và khóa review sau khi phê duyệt.
+- Dashboard responsive cho desktop/mobile, có trạng thái tải, rỗng, lỗi và Drive controls.
+- Audit `ANALYSIS_FINDING_REVIEWED` và `DOCUMENT_REVIEW_APPROVED`.
+
+Chỉ đánh dấu hoàn thành sau khi migration production được áp dụng, danh sách/chi tiết hiển
+thị PDF thật, review đủ findings, phê duyệt thành công và audit log được xác nhận.

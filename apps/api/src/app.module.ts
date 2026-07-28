@@ -7,9 +7,10 @@ import { RedisService } from "./redis.service.js";
 import { AuthModule } from "./auth/auth.module.js";
 import { InfrastructureModule } from "./infrastructure.module.js";
 import { DriveModule } from "./drive/drive.module.js";
+import { DocumentsModule } from "./documents/documents.module.js";
 
 @Module({
-  imports: [InfrastructureModule, AuthModule, DriveModule],
+  imports: [InfrastructureModule, AuthModule, DriveModule, DocumentsModule],
   controllers: [HealthController],
   providers: [
     HealthService,

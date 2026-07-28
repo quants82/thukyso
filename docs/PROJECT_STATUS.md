@@ -1,6 +1,6 @@
 # Trạng thái dự án Thư Ký Số
 
-Cập nhật: 27/07/2026
+Cập nhật: 28/07/2026
 
 ## 1. Tổng quan
 
@@ -10,7 +10,7 @@ Cập nhật: 27/07/2026
 - Website tạm: `https://thukyso.vatli365.vn`
 - Repository: `https://github.com/quants82/thukyso`
 - Nhánh triển khai: `main`
-- Phase hiện tại: Phase 5 đã hoàn thành trên production; chuẩn bị Phase 6
+- Phase hiện tại: Phase 6 đã hoàn thành mã nguồn; chờ kiểm thử production
 
 Sản phẩm không phải dịch vụ chữ ký điện tử.
 
@@ -122,21 +122,26 @@ Production Phase 1 hiện đang hoạt động:
 
 ## 4. Đang làm
 
-Phase 5 đã hoàn thành và được kiểm chứng trên production. Chuẩn bị triển khai Phase 6:
-giao diện quản lý, xem danh sách, chi tiết và kết quả phân tích văn bản.
+Mã nguồn Phase 6 đã hoàn thành: API danh sách/chi tiết, review finding, phê duyệt văn bản,
+audit log và dashboard responsive. Chưa áp dụng migration hoặc triển khai build Phase 6
+lên production.
 
 ## 5. Bước tiếp theo
 
-Triển khai Phase 6 theo phạm vi trong roadmap, bắt đầu từ API chỉ đọc phục vụ danh sách và
-chi tiết văn bản, sau đó xây giao diện review kết quả AI. Không thay đổi pipeline Phase 5
-đã được xác nhận.
+Triển khai Phase 6 lên production theo từng lệnh:
+
+1. Pull commit Phase 6 và cài dependency khóa.
+2. Generate Prisma, kiểm tra rồi áp dụng migration `20260728010000_phase_6_document_review`.
+3. Build toàn bộ API/web và restart riêng `thukyso-api`.
+4. Kiểm tra API danh sách/chi tiết bằng phiên đăng nhập thật.
+5. Review 10 findings của PDF thật, phê duyệt văn bản và xác nhận hai loại audit log.
 
 ## 6. Các phase sau
 
 - Phase 3: hoàn thành kết nối Google Drive với `drive.file` và Google Picker.
 - Phase 4: hoàn thành worker quét thư mục Drive idempotent.
 - Phase 5: hoàn thành pipeline Gemini và kiểm chứng bằng PDF thật trên production.
-- Phase 6: giao diện quản lý văn bản.
+- Phase 6: mã nguồn giao diện quản lý/review hoàn tất, chờ production.
 - Phase 7: so sánh văn bản.
 - Phase 8: sinh Google Docs/Sheets và biểu mẫu.
 - Phase 9: giao việc.

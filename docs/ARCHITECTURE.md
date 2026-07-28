@@ -120,3 +120,22 @@ BullMQ analyze-document
 - Không ghi PDF/DOCX tạm xuống đĩa; buffer được giải phóng sau job.
 - Một kết quả phân tích duy nhất theo `(documentId, sourceSha256, schemaVersion, model)`.
 - Phase 5 chỉ phân tích văn bản. So sánh tài liệu thuộc Phase 7, sinh báo cáo thuộc Phase 8.
+
+## Quản lý và review văn bản Phase 6
+
+```text
+React dashboard
+  -> GET /api/v1/documents
+  -> GET /api/v1/documents/:id
+  -> PATCH /api/v1/documents/:id/findings/:findingId
+  -> POST /api/v1/documents/:id/approve
+```
+
+- Mọi truy vấn bị giới hạn theo organization membership của phiên đăng nhập.
+- Kết quả AI gốc không bị ghi đè. Quyết định của người dùng được lưu riêng trên
+  `AnalysisFinding` với trạng thái `CONFIRMED`, `DISMISSED` hoặc `EDITED`.
+- Văn bản chỉ chuyển từ `REVIEW_REQUIRED` sang `APPROVED` sau khi không còn finding
+  `PENDING`.
+- Finding của văn bản đã phê duyệt không thể chỉnh sửa lại qua API Phase 6.
+- Review finding và phê duyệt văn bản đều tạo audit log cùng request ID, IP và user agent.
+- API không trả Google token, Gemini API key hoặc nội dung file gốc cho frontend.

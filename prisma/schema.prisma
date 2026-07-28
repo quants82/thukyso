@@ -60,6 +60,13 @@ enum JobStatus {
   FAILED
 }
 
+enum FindingReviewStatus {
+  PENDING
+  CONFIRMED
+  DISMISSED
+  EDITED
+}
+
 model User {
   id               String            @id @default(uuid()) @db.Uuid
   email            String            @unique
@@ -77,6 +84,7 @@ model User {
   devices          Device[]
   auditLogs        AuditLog[]
   sessions         UserSession[]
+  reviewedFindings AnalysisFinding[] @relation("FindingReviewer")
 }
 
 model UserSession {
@@ -239,24 +247,33 @@ model DocumentAnalysis {
   document         Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
   findings         AnalysisFinding[]
 
-  @@index([documentId, createdAt])
   @@unique([documentId, sourceSha256, schemaVersion, model], map: "DocumentAnalysis_source_key")
+  @@index([documentId, createdAt])
 }
 
 model AnalysisFinding {
-  id         String           @id @default(uuid()) @db.Uuid
-  analysisId String           @db.Uuid
-  type       String
-  title      String
-  detail     String?
-  page       Int?
-  section    String?
-  quote      String?
-  confidence Float?
-  createdAt  DateTime         @default(now())
-  analysis   DocumentAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  id             String              @id @default(uuid()) @db.Uuid
+  analysisId     String              @db.Uuid
+  type           String
+  title          String
+  detail         String?
+  page           Int?
+  section        String?
+  quote          String?
+  confidence     Float?
+  reviewStatus   FindingReviewStatus @default(PENDING)
+  reviewedTitle  String?
+  reviewedDetail String?
+  reviewNote     String?
+  reviewedAt     DateTime?
+  reviewedById   String?             @db.Uuid
+  createdAt      DateTime            @default(now())
+  analysis       DocumentAnalysis    @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  reviewedBy     User?               @relation("FindingReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([analysisId, type])
+  @@index([analysisId, reviewStatus])
+  @@index([reviewedById])
 }
 
 model DocumentComparison {
