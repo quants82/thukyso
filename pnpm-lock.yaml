@@ -54,6 +54,9 @@ importers:
       '@thukyso/config':
         specifier: workspace:*
         version: link:../../packages/config
+      bullmq:
+        specifier: ^5.56.9
+        version: 5.80.10
       cookie:
         specifier: ^1.0.2
         version: 1.1.1

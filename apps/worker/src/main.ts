@@ -9,6 +9,8 @@ import { createDocumentQueue, DOCUMENT_QUEUE_NAME } from "./queue.js";
 import { DriveScanner } from "./scanner.js";
 import { ScannerRepository } from "./scanner.repository.js";
 import { workerStatus } from "./status.js";
+import { ComparisonProcessor } from "./comparison.processor.js";
+import { PrismaClient } from "@prisma/client";
 
 const environment = loadWorkerEnvironment();
 const queue = createDocumentQueue(environment.REDIS_URL, environment.REDIS_PREFIX);
@@ -35,9 +37,18 @@ const analysisProcessor = new AnalysisProcessor(
   environment.MAX_DOCUMENT_SIZE_MB * 1024 * 1024,
   environment.MAX_EXTRACTED_TEXT_CHARS
 );
+const comparisonPrisma = new PrismaClient();
+const comparisonProcessor = new ComparisonProcessor(
+  comparisonPrisma,
+  new GeminiInteractionsClient(environment.GEMINI_API_KEY, environment.GEMINI_MODEL),
+  environment.GEMINI_MODEL
+);
 const analysisWorker = new Worker(
   DOCUMENT_QUEUE_NAME,
-  (job) => analysisProcessor.process(job),
+  (job) =>
+    job.name === "compare-documents"
+      ? comparisonProcessor.process(job)
+      : analysisProcessor.process(job),
   {
     connection: redisConnectionOptions(environment.REDIS_URL),
     prefix: environment.REDIS_PREFIX,
@@ -90,6 +101,7 @@ async function shutdown() {
     redis.quit(),
     repository.close(),
     analysisRepository.close()
+    , comparisonPrisma.$disconnect()
   ]);
   process.exitCode = 0;
 }

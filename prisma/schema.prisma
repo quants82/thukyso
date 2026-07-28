@@ -280,12 +280,22 @@ model DocumentComparison {
   id               String   @id @default(uuid()) @db.Uuid
   sourceDocumentId String   @db.Uuid
   targetDocumentId String   @db.Uuid
-  result           Json
+  sourceSha256     String
+  targetSha256     String
+  model            String
+  schemaVersion    String
+  status           String   @default("PENDING")
+  result           Json?
+  errorCode        String?
+  errorMessage     String?
+  requestedById    String?  @db.Uuid
   createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   sourceDocument   Document @relation("SourceDocument", fields: [sourceDocumentId], references: [id], onDelete: Cascade)
   targetDocument   Document @relation("TargetDocument", fields: [targetDocumentId], references: [id], onDelete: Cascade)
 
-  @@unique([sourceDocumentId, targetDocumentId])
+  @@unique([sourceDocumentId, targetDocumentId, sourceSha256, targetSha256, schemaVersion, model], map: "DocumentComparison_source_key")
+  @@index([sourceDocumentId, targetDocumentId, createdAt])
 }
 
 model ReportTemplate {

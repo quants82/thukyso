@@ -5,6 +5,21 @@
   font-synthesis: none;
 }
 
+.comparison-toolbar, .comparison-result {
+  background: #fff;
+  border: 1px solid #dce7e3;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.comparison-toolbar { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.comparison-toolbar small { display: block; margin-top: 4px; color: #60756f; }
+.document-open { display: contents; color: inherit; text-align: left; }
+.comparison-changes { display: grid; gap: 12px; margin-top: 16px; }
+.comparison-changes article { border-left: 4px solid #00876a; background: #f5faf8; padding: 14px 16px; }
+.comparison-changes h4 { margin: 8px 0; }
+.comparison-changes p { margin: 6px 0; }
+
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }
 button, input, select, textarea { font: inherit; }

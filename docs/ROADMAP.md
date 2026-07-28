@@ -9,7 +9,7 @@
 | 4 | Worker quét Drive idempotent | Hoàn thành |
 | 5 | Pipeline phân tích Gemini | Hoàn thành |
 | 6 | Giao diện quản lý văn bản | Mã nguồn hoàn thành; chờ production |
-| 7 | So sánh văn bản | Chưa bắt đầu |
+| 7 | So sánh văn bản | Mã nguồn hoàn thành; chờ production |
 | 8 | Sinh báo cáo và biểu mẫu | Chưa bắt đầu |
 | 9 | Giao việc | Chưa bắt đầu |
 | 10 | Email và thông báo | Chưa bắt đầu |
@@ -109,3 +109,11 @@ Gemini hoặc tạo dữ liệu/audit trùng. Đây là nền dữ liệu đã d
 
 Chỉ đánh dấu hoàn thành sau khi migration production được áp dụng, danh sách/chi tiết hiển
 thị PDF thật, review đủ findings, phê duyệt thành công và audit log được xác nhận.
+
+## Kết quả mã nguồn Phase 7
+
+- Chọn văn bản cũ/mới đã phân tích trong cùng organization.
+- BullMQ worker so sánh bằng Gemini; API/frontend không nhận API key.
+- Kết quả có nguồn hai phía, tác động, việc cần làm và mục chưa đủ căn cứ.
+- Khóa checksum/schema chống xử lý trùng; audit khi hoàn tất.
+- Dashboard chỉ hiển thị thay đổi có ý nghĩa, không kể lại toàn bộ hai văn bản.

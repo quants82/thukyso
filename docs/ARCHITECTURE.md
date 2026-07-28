@@ -139,3 +139,19 @@ React dashboard
 - Finding của văn bản đã phê duyệt không thể chỉnh sửa lại qua API Phase 6.
 - Review finding và phê duyệt văn bản đều tạo audit log cùng request ID, IP và user agent.
 - API không trả Google token, Gemini API key hoặc nội dung file gốc cho frontend.
+
+## So sánh văn bản Phase 7
+
+```text
+API tạo DocumentComparison
+  -> BullMQ compare-documents
+  -> worker đọc hai analysis mới nhất
+  -> Gemini structured comparison
+  -> PostgreSQL + audit log
+```
+
+- Chỉ so sánh hai văn bản đã phân tích trong cùng organization.
+- Idempotent theo hai document, hai checksum và schema so sánh.
+- Gemini key chỉ thuộc worker. API/frontend chỉ thấy trạng thái và kết quả.
+- Kết luận thiếu nguồn hai phía phải đánh dấu `UNCLEAR`, không được suy diễn.
+- Giao diện loại mục `UNCHANGED`, ưu tiên thay đổi, tác động và việc cần làm.

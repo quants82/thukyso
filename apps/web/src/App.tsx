@@ -118,6 +118,25 @@ interface DocumentListResponse {
   items: DocumentListItem[];
 }
 
+interface ComparisonResult {
+  relationship: string;
+  executiveSummary: string;
+  changes: Array<{
+    category: string; topic: string; oldRule?: string | null; newRule?: string | null;
+    practicalImpact?: string | null; actionRequired?: string | null;
+    confidence: number; needsReview: boolean;
+  }>;
+  unresolvedQuestions: string[];
+}
+
+interface Comparison {
+  id: string;
+  status: string;
+  result?: ComparisonResult | null;
+  sourceDocument?: { name: string };
+  targetDocument?: { name: string };
+}
+
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/v1${path}`, {
     credentials: "include",
@@ -185,6 +204,8 @@ export function App() {
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparison, setComparison] = useState<Comparison | null>(null);
 
   const loadConnection = useCallback(async () => {
     setConnection(await api<DriveConnection | null>("/drive/connection"));
@@ -329,6 +350,31 @@ export function App() {
     }
   }
 
+  async function compareDocuments() {
+    if (compareIds.length !== 2) return;
+    setBusy(true);
+    try {
+      const created = await api<Comparison>("/comparisons", {
+        method: "POST",
+        body: JSON.stringify({
+          sourceDocumentId: compareIds[0],
+          targetDocumentId: compareIds[1]
+        })
+      });
+      setComparison(created);
+      setMessage("Đã đưa yêu cầu so sánh vào hàng đợi.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Không thể tạo so sánh");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function refreshComparison() {
+    if (!comparison) return;
+    setComparison(await api<Comparison>(`/comparisons/${comparison.id}`));
+  }
+
   if (user === undefined) {
     return <main className="auth-shell"><div className="loading-card">Đang kiểm tra phiên đăng nhập…</div></main>;
   }
@@ -417,6 +463,17 @@ export function App() {
               onPage={setPage}
               onSelect={(id) => void loadDetail(id)}
               onUpload={() => void queueFile()}
+              compareIds={compareIds}
+              comparison={comparison}
+              onToggleCompare={(id) =>
+                setCompareIds((current) =>
+                  current.includes(id)
+                    ? current.filter((item) => item !== id)
+                    : current.length < 2 ? [...current, id] : [current[1]!, id]
+                )
+              }
+              onCompare={() => void compareDocuments()}
+              onRefreshComparison={() => void refreshComparison()}
               busy={busy}
             />
           )}
@@ -437,6 +494,11 @@ function DocumentDashboard(props: {
   onPage: (page: number) => void;
   onSelect: (id: string) => void;
   onUpload: () => void;
+  compareIds: string[];
+  comparison: Comparison | null;
+  onToggleCompare: (id: string) => void;
+  onCompare: () => void;
+  onRefreshComparison: () => void;
 }) {
   const reviewCount = props.data?.summary.reviewRequired ?? 0;
   const approvedCount = props.data?.summary.approved ?? 0;
@@ -452,6 +514,12 @@ function DocumentDashboard(props: {
         <Metric label="Đã duyệt" value={approvedCount} tone="green" />
       </div>
       <div className="document-panel">
+        <div className="comparison-toolbar">
+          <div><strong>So sánh văn bản</strong><small>Chọn văn bản cũ trước, văn bản mới sau.</small></div>
+          <button disabled={props.busy || props.compareIds.length !== 2} onClick={props.onCompare}>
+            So sánh {props.compareIds.length}/2
+          </button>
+        </div>
         <div className="filters">
           <input
             aria-label="Tìm văn bản"
@@ -478,7 +546,14 @@ function DocumentDashboard(props: {
         ) : (
           <div className="document-list">
             {props.data.items.map((document) => (
-              <button className="document-row" key={document.id} onClick={() => props.onSelect(document.id)}>
+              <div className="document-row" key={document.id}>
+                <input
+                  type="checkbox"
+                  aria-label={`Chọn ${document.name} để so sánh`}
+                  checked={props.compareIds.includes(document.id)}
+                  onChange={() => props.onToggleCompare(document.id)}
+                />
+                <button className="document-open" onClick={() => props.onSelect(document.id)}>
                 <span className="file-icon">{document.mimeType.includes("pdf") ? "PDF" : "DOC"}</span>
                 <span className="document-main">
                   <strong>{document.name}</strong>
@@ -494,7 +569,8 @@ function DocumentDashboard(props: {
                     : "Không có ngoại lệ"}
                 </span>
                 <span className="chevron">›</span>
-              </button>
+                </button>
+              </div>
             ))}
           </div>
         )}
@@ -506,7 +582,41 @@ function DocumentDashboard(props: {
           </div>
         )}
       </div>
+      {props.comparison && (
+        <ComparisonView comparison={props.comparison} onRefresh={props.onRefreshComparison} />
+      )}
     </>
+  );
+}
+
+function ComparisonView(props: { comparison: Comparison; onRefresh: () => void }) {
+  const result = props.comparison.result;
+  return (
+    <section className="comparison-result">
+      <div className="section-heading">
+        <div><span className="section-kicker">PHASE 7</span><h3>Kết quả so sánh</h3></div>
+        {props.comparison.status === "PENDING" && <button onClick={props.onRefresh}>Kiểm tra kết quả</button>}
+      </div>
+      {props.comparison.status === "PENDING" ? <p>Worker đang so sánh hai văn bản…</p> :
+       props.comparison.status === "FAILED" ? <p>So sánh chưa thành công. Vui lòng thử lại.</p> :
+       result && <>
+         <p><strong>{result.relationship}</strong></p>
+         <p>{result.executiveSummary}</p>
+         <div className="comparison-changes">
+           {result.changes.filter((change) => change.category !== "UNCHANGED").map((change, index) => (
+             <article key={`${change.topic}-${index}`}>
+               <span className="status-pill">{change.category}</span>
+               <h4>{change.topic}</h4>
+               {change.oldRule && <p><strong>Quy định cũ:</strong> {change.oldRule}</p>}
+               {change.newRule && <p><strong>Quy định mới:</strong> {change.newRule}</p>}
+               {change.practicalImpact && <p><strong>Tác động:</strong> {change.practicalImpact}</p>}
+               {change.actionRequired && <p><strong>Cần làm:</strong> {change.actionRequired}</p>}
+               {change.needsReview && <small>Cần đối chiếu thêm nguồn gốc</small>}
+             </article>
+           ))}
+         </div>
+       </>}
+    </section>
   );
 }
 

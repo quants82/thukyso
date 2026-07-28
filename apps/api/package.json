@@ -17,6 +17,7 @@
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
     "@thukyso/config": "workspace:*",
+    "bullmq": "^5.56.9",
     "cookie": "^1.0.2",
     "express": "^5.1.0",
     "google-auth-library": "^10.3.0",

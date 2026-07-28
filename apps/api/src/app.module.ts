@@ -8,9 +8,16 @@ import { AuthModule } from "./auth/auth.module.js";
 import { InfrastructureModule } from "./infrastructure.module.js";
 import { DriveModule } from "./drive/drive.module.js";
 import { DocumentsModule } from "./documents/documents.module.js";
+import { ComparisonsModule } from "./comparisons/comparisons.module.js";
 
 @Module({
-  imports: [InfrastructureModule, AuthModule, DriveModule, DocumentsModule],
+  imports: [
+    InfrastructureModule,
+    AuthModule,
+    DriveModule,
+    DocumentsModule,
+    ComparisonsModule
+  ],
   controllers: [HealthController],
   providers: [
     HealthService,

@@ -141,6 +141,9 @@ Triển khai Phase 6 lên production theo từng lệnh:
 
 ## 6. Các phase sau
 
+Phase 7 đã hoàn thành mã nguồn local và vượt qua lint, typecheck, test, build; đang chờ
+commit, migration và kiểm chứng production bằng hai văn bản thật.
+
 - Phase 3: hoàn thành kết nối Google Drive với `drive.file` và Google Picker.
 - Phase 4: hoàn thành worker quét thư mục Drive idempotent.
 - Phase 5: hoàn thành pipeline Gemini và kiểm chứng bằng PDF thật trên production.

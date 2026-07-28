@@ -4,6 +4,9 @@
 
 ### Added
 
+- Thêm Phase 7 so sánh văn bản cũ/mới qua BullMQ và Gemini với nguồn dẫn hai phía,
+  kết quả idempotent, audit log và giao diện tập trung vào thay đổi cần áp dụng.
+
 - Khởi tạo pnpm monorepo cho web, API, worker và desktop.
 - Thêm các package dùng chung, tài liệu kiến trúc, roadmap và bảo mật.
 - Thêm PostgreSQL và Redis cho môi trường local bằng Docker Compose.

@@ -10,6 +10,12 @@ export { summarizeDocument } from "./summarize-document.js";
 export { analyzeRisks } from "./analyze-risks.js";
 export { detectTemplate } from "./detect-template.js";
 export { validateAnalysis } from "./validate-analysis.js";
+export { compareDocuments } from "./compare-documents.js";
+export {
+  COMPARISON_SCHEMA_VERSION,
+  comparisonResultSchema,
+  type ComparisonResult
+} from "./schemas/comparison.js";
 export {
   SCHEMA_VERSION,
   documentAnalysisSchema,
